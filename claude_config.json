@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "mcp-demo-server": {
+      "command": "python",
+      "args": ["server.py", "--stdio"],
+      "cwd": "/Users/peterhaney/code/mcp-server-v2"
+    },
+    "mcp-demo-server-remote": {
+      "transport": {
+        "type": "streamable-http",
+        "url": "https://mcp-server-613421470956.us-central1.run.app/mcp/"
+      }
+    }
+  }
+}
