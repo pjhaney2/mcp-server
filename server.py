@@ -18,10 +18,15 @@ from starlette.routing import Route
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Dict, Union, Any, List, Tuple
 
 from config import TOOL_CONFIGS, PROMPT_CONFIGS, RESOURCE_CONFIGS, SERVER_CONFIG
 from tools.calculator import add, subtract, multiply, divide
+from tools.acs_data.acs_social_county import acs_social_county_pull
+from tools.acs_data.acs_economic_county import acs_economic_county_pull
+from tools.acs_data.acs_housing_county import acs_housing_county_pull
+from tools.acs_data.acs_county_fips import search_county_fips
+from tools.acs_data.acs_place_fips import search_place_fips
 from prompts.pirate_talk import get_pirate_prompt
 
 # Set up logging
@@ -69,6 +74,51 @@ def calculator_divide(a: float, b: float) -> float:
     except Exception as e:
         logger.error(f"Error in calculator_divide: {e}")
         raise ValueError("Invalid input: Please provide valid numbers")
+
+@mcp.tool()
+def acs_social_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls county-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_social_county_pull(geo_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_social_county_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
+def acs_economic_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls county-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_economic_county_pull(geo_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_economic_county_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
+def acs_housing_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls county-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_housing_county_pull(geo_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_housing_county_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
+def search_county_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for counties by keyword and return their FIPS codes"""
+    try:
+        return search_county_fips(keyword, max_results)
+    except Exception as e:
+        logger.error(f"Error in search_county_fips: {e}")
+        raise ValueError("Invalid input: Please provide a valid search keyword")
+
+@mcp.tool()
+def search_place_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for places (cities, towns, CDPs) by keyword and return their FIPS codes"""
+    try:
+        return search_place_fips(keyword, max_results)
+    except Exception as e:
+        logger.error(f"Error in search_place_fips: {e}")
+        raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.prompt(name="pirate_talk", description="Transform text to sound like a pirate")
 def pirate_talk(text: str) -> list:

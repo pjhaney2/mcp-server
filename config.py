@@ -39,6 +39,79 @@ TOOL_CONFIGS = {
                 }
             }
         ]
+    },
+    "acs_social_county": {
+        "name": "ACS Social County Data",
+        "description": "Pulls data from the US Census Bureau's American Community Survey (ACS) 5-year estimates for county-level social characteristics",
+        "tools": [
+            {
+                "name": "acs_social_county_pull",
+                "description": "Pulls county-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
+                "parameters": {
+                    "geo_fips": {"type": "string", "description": "County FIPS code (3 digits)"},
+                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
+                }
+            }
+        ]
+    },
+    "acs_economic_county": {
+        "name": "ACS Economic County Data",
+        "description": "Pulls data from the US Census Bureau's American Community Survey (ACS) 5-year estimates for county-level economic characteristics",
+        "tools": [
+            {
+                "name": "acs_economic_county_pull",
+                "description": "Pulls county-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
+                "parameters": {
+                    "geo_fips": {"type": "string", "description": "County FIPS code (3 digits)"},
+                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
+                }
+            }
+        ]
+    },
+    "acs_housing_county": {
+        "name": "ACS Housing County Data",
+        "description": "Pulls data from the US Census Bureau's American Community Survey (ACS) 5-year estimates for county-level housing characteristics",
+        "tools": [
+            {
+                "name": "acs_housing_county_pull",
+                "description": "Pulls county-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
+                "parameters": {
+                    "geo_fips": {"type": "string", "description": "County FIPS code (3 digits)"},
+                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
+                }
+            }
+        ]
+    },
+    "county_fips_search": {
+        "name": "County FIPS Search",
+        "description": "Search for US county FIPS codes by county name keyword",
+        "tools": [
+            {
+                "name": "search_county_fips",
+                "description": "Search for counties by keyword and return their FIPS codes",
+                "parameters": {
+                    "keyword": {"type": "string", "description": "Search term to match against county names (case-insensitive)"},
+                    "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
+                }
+            }
+        ]
+    },
+    "place_fips_search": {
+        "name": "Place FIPS Search",
+        "description": "Search for US place FIPS codes by place name keyword",
+        "tools": [
+            {
+                "name": "search_place_fips",
+                "description": "Search for places (cities, towns, CDPs) by keyword and return their FIPS codes",
+                "parameters": {
+                    "keyword": {"type": "string", "description": "Search term to match against place names (case-insensitive)"},
+                    "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
+                }
+            }
+        ]
     }
 }
 
