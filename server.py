@@ -25,8 +25,22 @@ from tools.calculator import add, subtract, multiply, divide
 from tools.acs_data.acs_social_county import acs_social_county_pull
 from tools.acs_data.acs_economic_county import acs_economic_county_pull
 from tools.acs_data.acs_housing_county import acs_housing_county_pull
+from tools.acs_data.acs_social_place import acs_social_place_pull
+from tools.acs_data.acs_economic_place import acs_economic_place_pull
+from tools.acs_data.acs_housing_place import acs_housing_place_pull
+from tools.acs_data.acs_social_msa import acs_social_msa_pull
+from tools.acs_data.acs_economic_msa import acs_economic_msa_pull
+from tools.acs_data.acs_housing_msa import acs_housing_msa_pull
+from tools.acs_data.acs_social_state import acs_social_state_pull
+from tools.acs_data.acs_economic_state import acs_economic_state_pull
+from tools.acs_data.acs_housing_state import acs_housing_state_pull
+from tools.acs_data.acs_social_national import acs_social_national_pull
+from tools.acs_data.acs_economic_national import acs_economic_national_pull
+from tools.acs_data.acs_housing_national import acs_housing_national_pull
 from tools.acs_data.acs_county_fips import search_county_fips
 from tools.acs_data.acs_place_fips import search_place_fips
+from tools.acs_data.acs_msa_fips import search_msa_fips
+from tools.acs_data.acs_state_fips import search_state_fips
 from prompts.pirate_talk import get_pirate_prompt
 
 # Set up logging
@@ -103,6 +117,33 @@ def acs_housing_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
+def acs_social_place_pull_tool(place_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls place-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_social_place_pull(place_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_social_place_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
+def acs_economic_place_pull_tool(place_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls place-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_economic_place_pull(place_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_economic_place_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
+def acs_housing_place_pull_tool(place_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls place-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_housing_place_pull(place_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_housing_place_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
 def search_county_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """Search for counties by keyword and return their FIPS codes"""
     try:
@@ -119,6 +160,105 @@ def search_place_fips_tool(keyword: str, max_results: Optional[int] = 20) -> Lis
     except Exception as e:
         logger.error(f"Error in search_place_fips: {e}")
         raise ValueError("Invalid input: Please provide a valid search keyword")
+
+@mcp.tool()
+def search_msa_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for MSA/Micropolitan areas by keyword and return their FIPS codes"""
+    try:
+        return search_msa_fips(keyword, max_results)
+    except Exception as e:
+        logger.error(f"Error in search_msa_fips: {e}")
+        raise ValueError("Invalid input: Please provide a valid search keyword")
+
+@mcp.tool()
+def search_state_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for states by keyword and return their FIPS codes"""
+    try:
+        return search_state_fips(keyword, max_results)
+    except Exception as e:
+        logger.error(f"Error in search_state_fips: {e}")
+        raise ValueError("Invalid input: Please provide a valid search keyword")
+
+@mcp.tool()
+def acs_social_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls MSA/Micropolitan area-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_social_msa_pull(msa_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_social_msa_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
+
+@mcp.tool()
+def acs_economic_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls MSA/Micropolitan area-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_economic_msa_pull(msa_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_economic_msa_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
+
+@mcp.tool()
+def acs_housing_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls MSA/Micropolitan area-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_housing_msa_pull(msa_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_housing_msa_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
+
+@mcp.tool()
+def acs_social_state_pull_tool(state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls state-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_social_state_pull(state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_social_state_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
+
+@mcp.tool()
+def acs_economic_state_pull_tool(state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls state-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_economic_state_pull(state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_economic_state_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
+
+@mcp.tool()
+def acs_housing_state_pull_tool(state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls state-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_housing_state_pull(state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_housing_state_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
+
+@mcp.tool()
+def acs_social_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls national-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_social_national_pull(year)
+    except Exception as e:
+        logger.error(f"Error in acs_social_national_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid optional year")
+
+@mcp.tool()
+def acs_economic_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls national-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_economic_national_pull(year)
+    except Exception as e:
+        logger.error(f"Error in acs_economic_national_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid optional year")
+
+@mcp.tool()
+def acs_housing_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls national-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+    try:
+        return acs_housing_national_pull(year)
+    except Exception as e:
+        logger.error(f"Error in acs_housing_national_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid optional year")
 
 @mcp.prompt(name="pirate_talk", description="Transform text to sound like a pirate")
 def pirate_talk(text: str) -> list:
