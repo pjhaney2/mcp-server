@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Dict, Optional, Union, Any
+from typing import Dict, Optional, Union, Any, List
 import requests
 
 def acs_social_msa_pull(
-    msa_fips: str, 
+    msa_fips: List[str], 
     year: Optional[str] = None
 ) -> Dict[str, Any]:
     """
@@ -15,7 +15,8 @@ def acs_social_msa_pull(
     Total Population is found under PLACE OF BIRTH category.
 
     Args:
-        msa_fips (str): The FIPS code for the MSA/Micropolitan area (e.g., "16980" for Chicago-Naperville-Elgin)
+        msa_fips (List[str]): The FIPS code(s) for the MSA/Micropolitan area(s). 
+                              List of strings (e.g., ["16980"] or ["16980", "35620"])
         year (Optional[str]): Year of ACS data. Defaults to current year minus 2. Must be 2010 or later.
 
     Returns:
@@ -30,8 +31,16 @@ def acs_social_msa_pull(
 
         # Validate inputs
         
-        if not isinstance(msa_fips, str) or not msa_fips.isdigit():
-            return _error_response("msa_fips must be a string of digits.")
+        # Handle msa_fips as list
+        if not isinstance(msa_fips, list):
+            return _error_response("msa_fips must be a list of strings.")
+        
+        msa_fips_list = msa_fips
+        
+        # Validate all msa_fips codes
+        for fips in msa_fips_list:
+            if not isinstance(fips, str) or not fips.isdigit():
+                return _error_response("All msa_fips must be strings of digits.")
 
         # Handle year parameter and validate
         if year is not None:
@@ -47,9 +56,12 @@ def acs_social_msa_pull(
         else:
             target_year = str(datetime.now().year - 2)
         
+        # Create comma-separated string for multiple FIPS codes
+        msa_fips_str = ",".join(msa_fips_list)
+        
         params = {
             "get": f"NAME,group(DP02)",
-            "for": f"metropolitan statistical area/micropolitan statistical area:{msa_fips}",
+            "for": f"metropolitan statistical area/micropolitan statistical area:{msa_fips_str}",
             "key":"091b3e6e230ae7273599c133be45cec90de9e80a",
             "descriptive": "true",
         }

@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Dict, Optional, Union, Any
+from typing import Dict, Optional, Union, Any, List
 import requests
 
 def acs_economic_state_pull(
-    state_fips: str, 
+    state_fips: Union[str, List[str]], 
     year: Optional[str] = None
 ) -> Dict[str, Any]:
     """
@@ -15,7 +15,8 @@ def acs_economic_state_pull(
     is below the poverty level, and household income statistics.
 
     Args:
-        state_fips (str): The FIPS code for the state (e.g., "17" for Illinois)
+        state_fips (Union[str, List[str]]): The FIPS code(s) for the state(s). 
+                                            Can be a single string (e.g., "17") or list of strings (e.g., ["17", "06"])
         year (Optional[str]): Year of ACS data. Defaults to current year minus 2. Must be 2010 or later.
 
     Returns:
@@ -30,8 +31,18 @@ def acs_economic_state_pull(
 
         # Validate inputs
         
-        if not isinstance(state_fips, str) or not state_fips.isdigit():
-            return _error_response("state_fips must be a string of digits.")
+        # Handle state_fips as either string or list
+        if isinstance(state_fips, str):
+            state_fips_list = [state_fips]
+        elif isinstance(state_fips, list):
+            state_fips_list = state_fips
+        else:
+            return _error_response("state_fips must be a string or list of strings.")
+        
+        # Validate all state_fips codes
+        for fips in state_fips_list:
+            if not isinstance(fips, str) or not fips.isdigit():
+                return _error_response("All state_fips must be strings of digits.")
 
         # Handle year parameter and validate
         if year is not None:
@@ -47,9 +58,12 @@ def acs_economic_state_pull(
         else:
             target_year = str(datetime.now().year - 2)
         
+        # Create comma-separated string for multiple FIPS codes
+        state_fips_str = ",".join(state_fips_list)
+        
         params = {
             "get": f"NAME,group(DP03)",
-            "for": f"state:{state_fips}",
+            "for": f"state:{state_fips_str}",
             "key":"091b3e6e230ae7273599c133be45cec90de9e80a",
             "descriptive": "true",
         }

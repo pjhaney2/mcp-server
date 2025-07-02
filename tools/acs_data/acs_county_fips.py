@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
 import re
 
 """
@@ -3158,66 +3158,85 @@ def _get_county_fips_data() -> Dict[str, str]:
             "Weston County, Wyoming": "045",
     }
 
-def search_county_fips(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def search_county_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """
-    Search for counties by keyword and return their FIPS codes.
+    Search for counties by keyword(s) and return their FIPS codes.
     
-    Supports flexible multi-word searches. Results are prioritized by match quality:
+    Supports flexible multi-word searches and multiple search terms. Results are prioritized by match quality:
     1. Exact word matches (e.g., "cook" → "Cook County")
     2. All words match (e.g., "cook county illinois" → "Cook County, Illinois") 
     3. Partial matches (e.g., "coo" → "Cook County")
     
     Args:
-        keyword (str): Search term(s) to match against county names (case-insensitive)
+        keyword (List[str]): Search term(s) to match against county names (case-insensitive).
+                            List of strings for multiple searches, or single item list for one search.
         max_results (Optional[int]): Maximum number of results to return (default: 20)
     
     Returns:
-        List[Tuple[str, str]]: List of (county_name, fips_code) tuples matching the search
+        List[Tuple[str, str]]: List of (county_name, fips_code) tuples matching the search(es)
         
     Examples:
-        >>> search_county_fips("cook")
+        >>> search_county_fips(["cook"])
         [("Cook County, Georgia", "075"), ("Cook County, Illinois", "031")]
         
-        >>> search_county_fips("cook county illinois")
-        [("Cook County, Illinois", "031")]
+        >>> search_county_fips(["cook county illinois", "dupage county illinois"])
+        [("Cook County, Illinois", "031"), ("DuPage County, Illinois", "043")]
         
-        >>> search_county_fips("jefferson county colorado")
-        [("Jefferson County, Colorado", "059")]
+        >>> search_county_fips(["jefferson", "madison"])
+        [("Jefferson County, Alabama", "073"), ("Madison County, Alabama", "089"), ...]
     """
-    if not keyword or not keyword.strip():
+    # keyword is now always a list
+    if not keyword:
+        return []
+    keywords = [k.strip().lower() for k in keyword if k and k.strip()]
+    if not keywords:
         return []
     
-    keyword = keyword.strip().lower()
     county_data = _get_county_fips_data()
+    all_results = []
     
-    # Split the search query into individual terms
-    search_terms = re.split(r'\W+', keyword)
-    search_terms = [term for term in search_terms if term]  # Remove empty strings
-    
-    # Find matches with different priority levels
-    exact_matches = []
-    all_word_matches = []
-    partial_matches = []
-    
-    for county_name, fips_code in county_data.items():
-        county_lower = county_name.lower()
-        county_words = re.split(r'\W+', county_lower)
+    # Process each keyword separately
+    for search_keyword in keywords:
+        # Split the search query into individual terms
+        search_terms = re.split(r'\W+', search_keyword)
+        search_terms = [term for term in search_terms if term]  # Remove empty strings
         
-        # Priority 1: Single term that exactly matches a word in the county name
-        if len(search_terms) == 1 and search_terms[0] in county_words:
-            exact_matches.append((county_name, fips_code))
-        # Priority 2: All search terms appear as words in the county name
-        elif len(search_terms) > 1 and all(term in county_words for term in search_terms):
-            all_word_matches.append((county_name, fips_code))
-        # Priority 3: All search terms appear somewhere in the county name (substring match)
-        elif all(term in county_lower for term in search_terms):
-            partial_matches.append((county_name, fips_code))
+        if not search_terms:
+            continue
+        
+        # Find matches with different priority levels for this keyword
+        exact_matches = []
+        all_word_matches = []
+        partial_matches = []
+        
+        for county_name, fips_code in county_data.items():
+            county_lower = county_name.lower()
+            county_words = re.split(r'\W+', county_lower)
+            
+            # Priority 1: Single term that exactly matches a word in the county name
+            if len(search_terms) == 1 and search_terms[0] in county_words:
+                exact_matches.append((county_name, fips_code))
+            # Priority 2: All search terms appear as words in the county name
+            elif len(search_terms) > 1 and all(term in county_words for term in search_terms):
+                all_word_matches.append((county_name, fips_code))
+            # Priority 3: All search terms appear somewhere in the county name (substring match)
+            elif all(term in county_lower for term in search_terms):
+                partial_matches.append((county_name, fips_code))
+        
+        # Combine results for this keyword, prioritizing exact matches
+        keyword_results = exact_matches + all_word_matches + partial_matches
+        all_results.extend(keyword_results)
     
-    # Combine results, prioritizing exact matches, then all-word matches, then partial matches
-    results = exact_matches + all_word_matches + partial_matches
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_results = []
+    for result in all_results:
+        if result not in seen:
+            seen.add(result)
+            unique_results.append(result)
     
     # Apply max_results limit
     if max_results and max_results > 0:
-        results = results[:max_results]
+        unique_results = unique_results[:max_results]
     
-    return results
+    return unique_results

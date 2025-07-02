@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
 import re
 
 
@@ -32048,101 +32048,128 @@ def _get_place_fips_data() -> Dict[str, str]:
         "Zwolle town, Louisiana": "83685",
     }
 
-def search_place_fips(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def search_place_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """
-    Search for places by keyword and return their FIPS codes.
+    Search for places by keyword(s) and return their FIPS codes.
     
-    Supports flexible multi-word searches. Results are prioritized by match quality:
+    Supports flexible multi-word searches and multiple search terms. Results are prioritized by match quality:
     1. Exact word matches (e.g., "birmingham" → "Birmingham city, Alabama")
     2. All words match (e.g., "birmingham city alabama" → "Birmingham city, Alabama") 
     3. Partial matches (e.g., "birm" → "Birmingham city, Alabama")
     
     Args:
-        keyword (str): Search term(s) to match against place names (case-insensitive)
+        keyword (Union[str, List[str]]): Search term(s) to match against place names (case-insensitive).
+                                        Can be a single string or list of strings for multiple searches.
         max_results (Optional[int]): Maximum number of results to return (default: 20)
     
     Returns:
-        List[Tuple[str, str]]: List of (place_name, fips_code) tuples matching the search
+        List[Tuple[str, str]]: List of (place_name, fips_code) tuples matching the search(es)
         
     Examples:
         >>> search_place_fips("birmingham")
         [("Birmingham city, Alabama", "07000"), ("Birmingham city, Michigan", "08560")]
         
-        >>> search_place_fips("birmingham city alabama")
-        [("Birmingham city, Alabama", "07000")]
+        >>> search_place_fips(["chicago", "milwaukee"])
+        [("Chicago city, Illinois", "14000"), ("Milwaukee city, Wisconsin", "53000")]
         
-        >>> search_place_fips("new york city")
-        [("New York city, New York", "51000")]
+        >>> search_place_fips(["new york city", "los angeles"])
+        [("New York city, New York", "51000"), ("Los Angeles city, California", "44000")]
     """
-    if not keyword or not keyword.strip():
+    # Handle single string or list of strings
+    if isinstance(keyword, str):
+        if not keyword or not keyword.strip():
+            return []
+        keywords = [keyword.strip().lower()]
+    elif isinstance(keyword, list):
+        if not keyword:
+            return []
+        keywords = [k.strip().lower() for k in keyword if k and k.strip()]
+        if not keywords:
+            return []
+    else:
         return []
     
-    keyword = keyword.strip().lower()
     place_data = _get_place_fips_data()
+    all_results = []
     
-    # Split the search query into individual terms
-    search_terms = re.split(r'\W+', keyword)
-    search_terms = [term for term in search_terms if term]  # Remove empty strings
-    
-    # Special case: Handle "new york city" and "new york" specifically to return NYC
-    if set(search_terms) == {'new', 'york', 'city'} or set(search_terms) == {'new', 'york'}:
-        return [("New York city, New York", "51000")]
-    
-    # Find matches with different priority levels
-    exact_matches = []
-    all_word_matches = []
-    partial_matches = []
-    
-    for place_name, fips_code in place_data.items():
-        place_lower = place_name.lower()
-        place_words = re.split(r'\W+', place_lower)
+    # Process each keyword separately
+    for search_keyword in keywords:
+        # Split the search query into individual terms
+        search_terms = re.split(r'\W+', search_keyword)
+        search_terms = [term for term in search_terms if term]  # Remove empty strings
         
-        # Priority 1: Single term that exactly matches a word in the place name
-        if len(search_terms) == 1 and search_terms[0] in place_words:
-            exact_matches.append((place_name, fips_code))
-        # Priority 2: All search terms appear as words in the place name
-        elif len(search_terms) > 1:
-            # Check if this would be a problematic match (all terms found in place words)
-            if all(term in place_words for term in search_terms):
-                # For places with state info, check if it's a legitimate match or false positive
+        if not search_terms:
+            continue
+        
+        # Special case: Handle "new york city" and "new york" specifically to return NYC
+        if set(search_terms) == {'new', 'york', 'city'} or set(search_terms) == {'new', 'york'}:
+            all_results.append(("New York city, New York", "51000"))
+            continue
+        
+        # Find matches with different priority levels for this keyword
+        exact_matches = []
+        all_word_matches = []
+        partial_matches = []
+        
+        for place_name, fips_code in place_data.items():
+            place_lower = place_name.lower()
+            place_words = re.split(r'\W+', place_lower)
+            
+            # Priority 1: Single term that exactly matches a word in the place name
+            if len(search_terms) == 1 and search_terms[0] in place_words:
+                exact_matches.append((place_name, fips_code))
+            # Priority 2: All search terms appear as words in the place name
+            elif len(search_terms) > 1:
+                # Check if this would be a problematic match (all terms found in place words)
+                if all(term in place_words for term in search_terms):
+                    # For places with state info, check if it's a legitimate match or false positive
+                    if ', ' in place_name:
+                        place_part = place_name.split(', ')[0].lower()
+                        state_part = place_name.split(', ')[1].lower()
+                        place_part_words = re.split(r'\W+', place_part)
+                        state_words = re.split(r'\W+', state_part)
+                        
+                        # To avoid false positives like "new york city" matching "Albany city, New York",
+                        # require that at least one search term appears in the place part but not in the state part
+                        # Exclude common place type words that aren't meaningful for distinguishing places
+                        place_type_words = {'city', 'town', 'village', 'borough', 'township', 'cdp', 'county'}
+                        meaningful_place_terms = [term for term in search_terms if term in place_part_words and term not in state_words and term not in place_type_words]
+                        if len(meaningful_place_terms) > 0:
+                            all_word_matches.append((place_name, fips_code))
+                    else:
+                        # If no comma separator, use original logic
+                        all_word_matches.append((place_name, fips_code))
+            # Priority 3: All search terms appear somewhere in the place name (substring match)
+            # But exclude the state portion to avoid false matches like "new york city" matching "Albany city, New York"
+            else:
+                # Split place name into main part and state (format: "Place name, State")
                 if ', ' in place_name:
                     place_part = place_name.split(', ')[0].lower()
-                    state_part = place_name.split(', ')[1].lower()
-                    place_part_words = re.split(r'\W+', place_part)
-                    state_words = re.split(r'\W+', state_part)
-                    
-                    # To avoid false positives like "new york city" matching "Albany city, New York",
-                    # require that at least one search term appears in the place part but not in the state part
-                    # Exclude common place type words that aren't meaningful for distinguishing places
-                    place_type_words = {'city', 'town', 'village', 'borough', 'township', 'cdp', 'county'}
-                    meaningful_place_terms = [term for term in search_terms if term in place_part_words and term not in state_words and term not in place_type_words]
-                    if len(meaningful_place_terms) > 0:
-                        all_word_matches.append((place_name, fips_code))
+                    # Check if all terms match in the main place part (not including state)
+                    if all(term in place_part for term in search_terms):
+                        partial_matches.append((place_name, fips_code))
                 else:
-                    # If no comma separator, use original logic
-                    all_word_matches.append((place_name, fips_code))
-        # Priority 3: All search terms appear somewhere in the place name (substring match)
-        # But exclude the state portion to avoid false matches like "new york city" matching "Albany city, New York"
-        else:
-            # Split place name into main part and state (format: "Place name, State")
-            if ', ' in place_name:
-                place_part = place_name.split(', ')[0].lower()
-                # Check if all terms match in the main place part (not including state)
-                if all(term in place_part for term in search_terms):
-                    partial_matches.append((place_name, fips_code))
-            else:
-                # If no comma separator, use original logic for substring matching
-                if all(term in place_lower for term in search_terms):
-                    partial_matches.append((place_name, fips_code))
+                    # If no comma separator, use original logic for substring matching
+                    if all(term in place_lower for term in search_terms):
+                        partial_matches.append((place_name, fips_code))
+        
+        # Combine results for this keyword
+        keyword_results = exact_matches + all_word_matches + partial_matches
+        all_results.extend(keyword_results)
     
-    # Combine results, prioritizing exact matches, then all-word matches, then partial matches
-    results = exact_matches + all_word_matches + partial_matches
+    # Remove duplicates while preserving order
+    seen = set()
+    unique_results = []
+    for result in all_results:
+        if result not in seen:
+            seen.add(result)
+            unique_results.append(result)
     
     # Apply max_results limit
     if max_results and max_results > 0:
-        results = results[:max_results]
+        unique_results = unique_results[:max_results]
     
-    return results
+    return unique_results
 
 
 if __name__ == "__main__":

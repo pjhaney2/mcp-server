@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Dict, Optional, Union, Any
+from typing import Dict, Optional, Union, Any, List
 import requests
 
 def acs_housing_msa_pull(
-    msa_fips: str, 
+    msa_fips: Union[str, List[str]], 
     year: Optional[str] = None
 ) -> Dict[str, Any]:
     """
@@ -15,7 +15,8 @@ def acs_housing_msa_pull(
     house heating fuel, and selected characteristics.
 
     Args:
-        msa_fips (str): The FIPS code for the MSA/Micropolitan area (e.g., "16980" for Chicago-Naperville-Elgin)
+        msa_fips (Union[str, List[str]]): The FIPS code(s) for the MSA/Micropolitan area(s). 
+                                          Can be a single string (e.g., "16980") or list of strings (e.g., ["16980", "35620"])
         year (Optional[str]): Year of ACS data. Defaults to current year minus 2. Must be 2010 or later.
 
     Returns:
@@ -30,8 +31,18 @@ def acs_housing_msa_pull(
 
         # Validate inputs
         
-        if not isinstance(msa_fips, str) or not msa_fips.isdigit():
-            return _error_response("msa_fips must be a string of digits.")
+        # Handle msa_fips as either string or list
+        if isinstance(msa_fips, str):
+            msa_fips_list = [msa_fips]
+        elif isinstance(msa_fips, list):
+            msa_fips_list = msa_fips
+        else:
+            return _error_response("msa_fips must be a string or list of strings.")
+        
+        # Validate all msa_fips codes
+        for fips in msa_fips_list:
+            if not isinstance(fips, str) or not fips.isdigit():
+                return _error_response("All msa_fips must be strings of digits.")
 
         # Handle year parameter and validate
         if year is not None:
@@ -47,9 +58,12 @@ def acs_housing_msa_pull(
         else:
             target_year = str(datetime.now().year - 2)
         
+        # Create comma-separated string for multiple FIPS codes
+        msa_fips_str = ",".join(msa_fips_list)
+        
         params = {
             "get": f"NAME,group(DP04)",
-            "for": f"metropolitan statistical area/micropolitan statistical area:{msa_fips}",
+            "for": f"metropolitan statistical area/micropolitan statistical area:{msa_fips_str}",
             "key":"091b3e6e230ae7273599c133be45cec90de9e80a",
             "descriptive": "true",
         }

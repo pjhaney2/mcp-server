@@ -48,8 +48,8 @@ TOOL_CONFIGS = {
                 "name": "acs_social_county_pull",
                 "description": "Pulls county-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "geo_fips": {"type": "string", "description": "County FIPS code (3 digits)"},
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "geo_fips": {"type": "array", "items": {"type": "string"}, "description": "County FIPS code(s). Array of strings (e.g., ['031'] for single county or ['031', '045'] for multiple counties)"}, 
+                    "state_fips": {"type": "string", "description": "State FIPS code(s) as a STRING. Use '17' for single state or '17,06' for multiple states (comma-separated, no spaces, NO ARRAYS)"},
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -63,8 +63,8 @@ TOOL_CONFIGS = {
                 "name": "acs_economic_county_pull",
                 "description": "Pulls county-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "geo_fips": {"type": "string", "description": "County FIPS code (3 digits)"},
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "geo_fips": {"type": "array", "items": {"type": "string"}, "description": "County FIPS code(s). Array of strings (e.g., ['031'] for single county or ['031', '045'] for multiple counties)"}, 
+                    "state_fips": {"type": "string", "description": "State FIPS code(s) as a STRING. Use '17' for single state or '17,06' for multiple states (comma-separated, no spaces, NO ARRAYS)"},
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -78,8 +78,8 @@ TOOL_CONFIGS = {
                 "name": "acs_housing_county_pull",
                 "description": "Pulls county-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "geo_fips": {"type": "string", "description": "County FIPS code (3 digits)"},
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "geo_fips": {"type": "array", "items": {"type": "string"}, "description": "County FIPS code(s). Array of strings (e.g., ['031'] for single county or ['031', '045'] for multiple counties)"}, 
+                    "state_fips": {"type": "string", "description": "State FIPS code(s) as a STRING. Use '17' for single state or '17,06' for multiple states (comma-separated, no spaces, NO ARRAYS)"},
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -87,13 +87,13 @@ TOOL_CONFIGS = {
     },
     "county_fips_search": {
         "name": "County FIPS Search",
-        "description": "Search for US county FIPS codes by county name keyword",
+        "description": "Search for US county FIPS codes by county name keyword(s)",
         "tools": [
             {
                 "name": "search_county_fips",
-                "description": "Search for counties by keyword and return their FIPS codes",
+                "description": "Search for counties by keyword(s) and return their FIPS codes",
                 "parameters": {
-                    "keyword": {"type": "string", "description": "Search term to match against county names (case-insensitive)"},
+                    "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against county names (case-insensitive). Array of strings (e.g., ['cook', 'dupage']) for multiple searches, or single string ['cook'] for one search"},
                     "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
                 }
             }
@@ -101,13 +101,13 @@ TOOL_CONFIGS = {
     },
     "place_fips_search": {
         "name": "Place FIPS Search",
-        "description": "Search for US place FIPS codes by place name keyword",
+        "description": "Search for US place FIPS codes by place name keyword(s)",
         "tools": [
             {
                 "name": "search_place_fips",
-                "description": "Search for places (cities, towns, CDPs) by keyword and return their FIPS codes",
+                "description": "Search for places (cities, towns, CDPs) by keyword(s) and return their FIPS codes",
                 "parameters": {
-                    "keyword": {"type": "string", "description": "Search term to match against place names (case-insensitive)"},
+                    "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against place names (case-insensitive). Array of strings (e.g., ['chicago', 'milwaukee']) for multiple searches, or single string ['chicago'] for one search"},
                     "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
                 }
             }
@@ -115,13 +115,13 @@ TOOL_CONFIGS = {
     },
     "msa_fips_search": {
         "name": "MSA FIPS Search",
-        "description": "Search for US MSA/Micropolitan area FIPS codes by area name keyword",
+        "description": "Search for US MSA/Micropolitan area FIPS codes by area name keyword(s)",
         "tools": [
             {
                 "name": "search_msa_fips",
-                "description": "Search for MSA/Micropolitan areas by keyword and return their FIPS codes",
+                "description": "Search for MSA/Micropolitan areas by keyword(s) and return their FIPS codes",
                 "parameters": {
-                    "keyword": {"type": "string", "description": "Search term to match against MSA/Micropolitan area names (case-insensitive)"},
+                    "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against MSA/Micropolitan area names (case-insensitive). Array of strings (e.g., ['chicago', 'milwaukee']) for multiple searches, or single string ['chicago'] for one search"},
                     "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
                 }
             }
@@ -129,13 +129,13 @@ TOOL_CONFIGS = {
     },
     "state_fips_search": {
         "name": "State FIPS Search",
-        "description": "Search for US state FIPS codes by state name keyword",
+        "description": "Search for US state FIPS codes by state name keyword(s)",
         "tools": [
             {
                 "name": "search_state_fips",
-                "description": "Search for states by keyword and return their FIPS codes",
+                "description": "Search for states by keyword(s) and return their FIPS codes",
                 "parameters": {
-                    "keyword": {"type": "string", "description": "Search term to match against state names (case-insensitive)"},
+                    "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against state names (case-insensitive). Array of strings (e.g., ['california', 'texas']) for multiple searches, or single string ['california'] for one search"},
                     "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
                 }
             }
@@ -149,8 +149,8 @@ TOOL_CONFIGS = {
                 "name": "acs_social_place_pull",
                 "description": "Pulls place-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "place_fips": {"type": "string", "description": "Place FIPS code (5 digits)"},
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "place_fips": {"type": "array", "items": {"type": "string"}, "description": "Place FIPS code(s). Array of strings (e.g., ['14000'] for single place or ['14000', '51000'] for multiple places)"}, 
+                    "state_fips": {"type": "string", "description": "State FIPS code(s) as a STRING. Use '17' for single state or '17,06' for multiple states (comma-separated, no spaces, NO ARRAYS)"},
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -164,8 +164,8 @@ TOOL_CONFIGS = {
                 "name": "acs_economic_place_pull",
                 "description": "Pulls place-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "place_fips": {"type": "string", "description": "Place FIPS code (5 digits)"},
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "place_fips": {"type": "array", "items": {"type": "string"}, "description": "Place FIPS code(s). Array of strings (e.g., ['14000'] for single place or ['14000', '51000'] for multiple places)"}, 
+                    "state_fips": {"type": "string", "description": "State FIPS code(s) as a STRING. Use '17' for single state or '17,06' for multiple states (comma-separated, no spaces, NO ARRAYS)"},
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -179,8 +179,8 @@ TOOL_CONFIGS = {
                 "name": "acs_housing_place_pull",
                 "description": "Pulls place-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "place_fips": {"type": "string", "description": "Place FIPS code (5 digits)"},
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "place_fips": {"type": "array", "items": {"type": "string"}, "description": "Place FIPS code(s). Array of strings (e.g., ['14000'] for single place or ['14000', '51000'] for multiple places)"}, 
+                    "state_fips": {"type": "string", "description": "State FIPS code(s) as a STRING. Use '17' for single state or '17,06' for multiple states (comma-separated, no spaces, NO ARRAYS)"},
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -194,7 +194,7 @@ TOOL_CONFIGS = {
                 "name": "acs_social_msa_pull",
                 "description": "Pulls MSA/Micropolitan area-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "msa_fips": {"type": "string", "description": "MSA/Micropolitan area FIPS code (5 digits)"},
+                    "msa_fips": {"type": "array", "items": {"type": "string"}, "description": "MSA/Micropolitan area FIPS code(s). Array of strings (e.g., ['16980'] for single area or ['16980', '35620'] for multiple areas)"}, 
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -208,7 +208,7 @@ TOOL_CONFIGS = {
                 "name": "acs_economic_msa_pull",
                 "description": "Pulls MSA/Micropolitan area-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "msa_fips": {"type": "string", "description": "MSA/Micropolitan area FIPS code (5 digits)"},
+                    "msa_fips": {"type": "array", "items": {"type": "string"}, "description": "MSA/Micropolitan area FIPS code(s). Array of strings (e.g., ['16980'] for single area or ['16980', '35620'] for multiple areas)"}, 
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -222,7 +222,7 @@ TOOL_CONFIGS = {
                 "name": "acs_housing_msa_pull",
                 "description": "Pulls MSA/Micropolitan area-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "msa_fips": {"type": "string", "description": "MSA/Micropolitan area FIPS code (5 digits)"},
+                    "msa_fips": {"type": "array", "items": {"type": "string"}, "description": "MSA/Micropolitan area FIPS code(s). Array of strings (e.g., ['16980'] for single area or ['16980', '35620'] for multiple areas)"}, 
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -236,7 +236,7 @@ TOOL_CONFIGS = {
                 "name": "acs_social_state_pull",
                 "description": "Pulls state-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "state_fips": {"type": "array", "items": {"type": "string"}, "description": "State FIPS code(s). Array of strings (e.g., ['17'] for single state or ['17', '06'] for multiple states)"}, 
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -250,7 +250,7 @@ TOOL_CONFIGS = {
                 "name": "acs_economic_state_pull",
                 "description": "Pulls state-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "state_fips": {"type": "array", "items": {"type": "string"}, "description": "State FIPS code(s). Array of strings (e.g., ['17'] for single state or ['17', '06'] for multiple states)"}, 
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }
@@ -264,7 +264,7 @@ TOOL_CONFIGS = {
                 "name": "acs_housing_state_pull",
                 "description": "Pulls state-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates",
                 "parameters": {
-                    "state_fips": {"type": "string", "description": "State FIPS code (2 digits)"},
+                    "state_fips": {"type": "array", "items": {"type": "string"}, "description": "State FIPS code(s). Array of strings (e.g., ['17'] for single state or ['17', '06'] for multiple states)"}, 
                     "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
                 }
             }

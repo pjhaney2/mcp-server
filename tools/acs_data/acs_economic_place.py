@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Dict, Optional, Union, Any
+from typing import Dict, Optional, Union, Any, List
 import requests
 
 def acs_economic_place_pull(
-    place_fips: str, 
+    place_fips: List[str], 
     state_fips: str, 
     year: Optional[str] = None
 ) -> Dict[str, Any]:
@@ -16,7 +16,8 @@ def acs_economic_place_pull(
     is below the poverty level, and household income statistics.
 
     Args:
-        place_fips (str): The FIPS code for the place (e.g., "14000" for Chicago city, IL)
+        place_fips (List[str]): The FIPS code(s) for the place(s). 
+                                List of strings (e.g., ["14000"] or ["14000", "51000"])
         state_fips (str): The FIPS code for the state (e.g., "17" for Illinois)
         year (Optional[str]): Year of ACS data. Defaults to current year minus 2. Must be 2010 or later.
 
@@ -32,8 +33,16 @@ def acs_economic_place_pull(
 
         # Validate inputs
         
-        if not isinstance(place_fips, str) or not place_fips.isdigit():
-            return _error_response("place_fips must be a string of digits.")
+        # Handle place_fips as list
+        if not isinstance(place_fips, list):
+            return _error_response("place_fips must be a list of strings.")
+        
+        place_fips_list = place_fips
+        
+        # Validate all place_fips codes
+        for fips in place_fips_list:
+            if not isinstance(fips, str) or not fips.isdigit():
+                return _error_response("All place_fips must be strings of digits.")
         
         if not isinstance(state_fips, str) or not state_fips.isdigit():
             return _error_response("state_fips must be a string of digits.")
@@ -52,9 +61,12 @@ def acs_economic_place_pull(
         else:
             target_year = str(datetime.now().year - 2)
         
+        # Create comma-separated string for multiple FIPS codes
+        place_fips_str = ",".join(place_fips_list)
+        
         params = {
             "get": f"NAME,group(DP03)",
-            "for": f"place:{place_fips}",
+            "for": f"place:{place_fips_str}",
             "in": f"state:{state_fips}",
             "key":"091b3e6e230ae7273599c133be45cec90de9e80a",
             "descriptive": "true",

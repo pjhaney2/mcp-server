@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Tuple, Optional, Union
 import re
 
 """
@@ -940,17 +940,17 @@ def _get_msa_fips_data() -> Dict[str, str]:
         "Zapata, TX Micro Area": "49820",
     }
 
-def search_msa_fips(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def search_msa_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """
-    Search for Metropolitan Statistical Areas (MSAs) and Micropolitan Statistical Areas by keyword and return their FIPS codes.
+    Search for Metropolitan Statistical Areas (MSAs) and Micropolitan Statistical Areas by keyword(s) and return their FIPS codes.
     
-    Supports flexible multi-word searches. Results are prioritized by match quality:
+    Supports flexible multi-word searches and multiple search terms. Results are prioritized by match quality:
     1. Exact word matches (e.g., "atlanta" → "Atlanta-Sandy Springs-Roswell, GA Metro Area")
     2. All words match (e.g., "atlanta metro area" → "Atlanta-Sandy Springs-Roswell, GA Metro Area") 
     3. Partial matches (e.g., "atl" → "Atlanta-Sandy Springs-Roswell, GA Metro Area")
     
     Args:
-        keyword (str): Search term(s) to match against MSA/Micro area names (case-insensitive)
+        keyword (Union[str, List[str]]): Single search term or list of search terms to match against MSA/Micro area names (case-insensitive)
         max_results (Optional[int]): Maximum number of results to return (default: 20)
     
     Returns:
@@ -960,49 +960,65 @@ def search_msa_fips(keyword: str, max_results: Optional[int] = 20) -> List[Tuple
         >>> search_msa_fips("atlanta")
         [("Atlanta-Sandy Springs-Roswell, GA Metro Area", "12060")]
         
-        >>> search_msa_fips("chicago metro")
-        [("Chicago-Naperville-Elgin, IL-IN Metro Area", "16980")]
+        >>> search_msa_fips(["chicago", "milwaukee"])
+        [("Chicago-Naperville-Elgin, IL-IN Metro Area", "16980"), ("Milwaukee-Waukesha, WI Metro Area", "33340")]
         
         >>> search_msa_fips("new york")
         [("New York-Newark-Jersey City, NY-NJ Metro Area", "35620")]
     """
-    if not keyword or not keyword.strip():
+    # Handle both single string and list of strings
+    if isinstance(keyword, str):
+        keywords = [keyword]
+    else:
+        keywords = keyword
+    
+    # Remove empty keywords
+    keywords = [k.strip() for k in keywords if k and k.strip()]
+    if not keywords:
         return []
     
-    keyword = keyword.strip().lower()
     msa_data = _get_msa_fips_data()
+    all_results = []
+    seen = set()
     
-    # Split the search query into individual terms
-    search_terms = re.split(r'\W+', keyword)
-    search_terms = [term for term in search_terms if term]  # Remove empty strings
-    
-    # Find matches with different priority levels
-    exact_matches = []
-    all_word_matches = []
-    partial_matches = []
-    
-    for area_name, fips_code in msa_data.items():
-        area_lower = area_name.lower()
-        area_words = re.split(r'\W+', area_lower)
+    # Process each keyword
+    for kw in keywords:
+        kw = kw.lower()
         
-        # Priority 1: Single term that exactly matches a word in the area name
-        if len(search_terms) == 1 and search_terms[0] in area_words:
-            exact_matches.append((area_name, fips_code))
-        # Priority 2: All search terms appear as words in the area name
-        elif len(search_terms) > 1 and all(term in area_words for term in search_terms):
-            all_word_matches.append((area_name, fips_code))
-        # Priority 3: All search terms appear somewhere in the area name (substring match)
-        elif all(term in area_lower for term in search_terms):
-            partial_matches.append((area_name, fips_code))
-    
-    # Combine results, prioritizing exact matches, then all-word matches, then partial matches
-    results = exact_matches + all_word_matches + partial_matches
+        # Split the search query into individual terms
+        search_terms = re.split(r'\W+', kw)
+        search_terms = [term for term in search_terms if term]  # Remove empty strings
+        
+        # Find matches with different priority levels
+        exact_matches = []
+        all_word_matches = []
+        partial_matches = []
+        
+        for area_name, fips_code in msa_data.items():
+            area_lower = area_name.lower()
+            area_words = re.split(r'\W+', area_lower)
+            
+            # Priority 1: Single term that exactly matches a word in the area name
+            if len(search_terms) == 1 and search_terms[0] in area_words:
+                exact_matches.append((area_name, fips_code))
+            # Priority 2: All search terms appear as words in the area name
+            elif len(search_terms) > 1 and all(term in area_words for term in search_terms):
+                all_word_matches.append((area_name, fips_code))
+            # Priority 3: All search terms appear somewhere in the area name (substring match)
+            elif all(term in area_lower for term in search_terms):
+                partial_matches.append((area_name, fips_code))
+        
+        # Add results from this keyword, avoiding duplicates
+        for result in exact_matches + all_word_matches + partial_matches:
+            if result[1] not in seen:  # Check FIPS code for uniqueness
+                all_results.append(result)
+                seen.add(result[1])
     
     # Apply max_results limit
     if max_results and max_results > 0:
-        results = results[:max_results]
+        all_results = all_results[:max_results]
     
-    return results
+    return all_results
 
 
 if __name__ == "__main__":

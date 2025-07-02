@@ -21,7 +21,6 @@ from datetime import datetime
 from typing import Optional, Dict, Union, Any, List, Tuple
 
 from config import TOOL_CONFIGS, PROMPT_CONFIGS, RESOURCE_CONFIGS, SERVER_CONFIG
-from tools.calculator import add, subtract, multiply, divide
 from tools.acs_data.acs_social_county import acs_social_county_pull
 from tools.acs_data.acs_economic_county import acs_economic_county_pull
 from tools.acs_data.acs_housing_county import acs_housing_county_pull
@@ -53,45 +52,10 @@ logger = logging.getLogger(__name__)
 # Create the MCP server
 mcp = FastMCP(SERVER_CONFIG["name"])
 
-@mcp.tool()
-def calculator_add(a: float, b: float) -> float:
-    """Add two numbers"""
-    try:
-        return add(a, b)
-    except Exception as e:
-        logger.error(f"Error in calculator_add: {e}")
-        raise ValueError("Invalid input: Please provide valid numbers")
 
 @mcp.tool()
-def calculator_subtract(a: float, b: float) -> float:
-    """Subtract two numbers"""
-    try:
-        return subtract(a, b)
-    except Exception as e:
-        logger.error(f"Error in calculator_subtract: {e}")
-        raise ValueError("Invalid input: Please provide valid numbers")
-
-@mcp.tool()
-def calculator_multiply(a: float, b: float) -> float:
-    """Multiply two numbers"""
-    try:
-        return multiply(a, b)
-    except Exception as e:
-        logger.error(f"Error in calculator_multiply: {e}")
-        raise ValueError("Invalid input: Please provide valid numbers")
-
-@mcp.tool()
-def calculator_divide(a: float, b: float) -> float:
-    """Divide two numbers"""
-    try:
-        return divide(a, b)
-    except Exception as e:
-        logger.error(f"Error in calculator_divide: {e}")
-        raise ValueError("Invalid input: Please provide valid numbers")
-
-@mcp.tool()
-def acs_social_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls county-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_social_county_pull_tool(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls county-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple counties in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_social_county_pull(geo_fips, state_fips, year)
     except Exception as e:
@@ -99,8 +63,8 @@ def acs_social_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[s
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_economic_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls county-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_economic_county_pull_tool(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls county-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple counties in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_economic_county_pull(geo_fips, state_fips, year)
     except Exception as e:
@@ -108,8 +72,8 @@ def acs_economic_county_pull_tool(geo_fips: str, state_fips: str, year: Optional
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_housing_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls county-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_housing_county_pull_tool(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls county-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple counties in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_housing_county_pull(geo_fips, state_fips, year)
     except Exception as e:
@@ -117,8 +81,8 @@ def acs_housing_county_pull_tool(geo_fips: str, state_fips: str, year: Optional[
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_social_place_pull_tool(place_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls place-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_social_place_pull_tool(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls place-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple places in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_social_place_pull(place_fips, state_fips, year)
     except Exception as e:
@@ -126,8 +90,8 @@ def acs_social_place_pull_tool(place_fips: str, state_fips: str, year: Optional[
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_economic_place_pull_tool(place_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls place-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_economic_place_pull_tool(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls place-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple places in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_economic_place_pull(place_fips, state_fips, year)
     except Exception as e:
@@ -135,8 +99,8 @@ def acs_economic_place_pull_tool(place_fips: str, state_fips: str, year: Optiona
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_housing_place_pull_tool(place_fips: str, state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls place-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_housing_place_pull_tool(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls place-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple places in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_housing_place_pull(place_fips, state_fips, year)
     except Exception as e:
@@ -144,8 +108,8 @@ def acs_housing_place_pull_tool(place_fips: str, state_fips: str, year: Optional
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def search_county_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
-    """Search for counties by keyword and return their FIPS codes"""
+def search_county_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for counties by keyword(s) and return their FIPS codes"""
     try:
         return search_county_fips(keyword, max_results)
     except Exception as e:
@@ -153,8 +117,8 @@ def search_county_fips_tool(keyword: str, max_results: Optional[int] = 20) -> Li
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def search_place_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
-    """Search for places (cities, towns, CDPs) by keyword and return their FIPS codes"""
+def search_place_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for places (cities, towns, CDPs) by keyword(s) and return their FIPS codes"""
     try:
         return search_place_fips(keyword, max_results)
     except Exception as e:
@@ -162,8 +126,8 @@ def search_place_fips_tool(keyword: str, max_results: Optional[int] = 20) -> Lis
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def search_msa_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
-    """Search for MSA/Micropolitan areas by keyword and return their FIPS codes"""
+def search_msa_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for MSA/Micropolitan areas by keyword(s) and return their FIPS codes"""
     try:
         return search_msa_fips(keyword, max_results)
     except Exception as e:
@@ -171,8 +135,8 @@ def search_msa_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def search_state_fips_tool(keyword: str, max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
-    """Search for states by keyword and return their FIPS codes"""
+def search_state_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for states by keyword(s) and return their FIPS codes"""
     try:
         return search_state_fips(keyword, max_results)
     except Exception as e:
@@ -180,8 +144,8 @@ def search_state_fips_tool(keyword: str, max_results: Optional[int] = 20) -> Lis
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def acs_social_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls MSA/Micropolitan area-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_social_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls MSA/Micropolitan area-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple MSAs in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_social_msa_pull(msa_fips, year)
     except Exception as e:
@@ -189,8 +153,8 @@ def acs_social_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dict[
         raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
 
 @mcp.tool()
-def acs_economic_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls MSA/Micropolitan area-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_economic_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls MSA/Micropolitan area-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple MSAs in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_economic_msa_pull(msa_fips, year)
     except Exception as e:
@@ -198,8 +162,8 @@ def acs_economic_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dic
         raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
 
 @mcp.tool()
-def acs_housing_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls MSA/Micropolitan area-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_housing_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls MSA/Micropolitan area-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple MSAs in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_housing_msa_pull(msa_fips, year)
     except Exception as e:
@@ -207,8 +171,8 @@ def acs_housing_msa_pull_tool(msa_fips: str, year: Optional[str] = None) -> Dict
         raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
 
 @mcp.tool()
-def acs_social_state_pull_tool(state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls state-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_social_state_pull_tool(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls state-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple states in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_social_state_pull(state_fips, year)
     except Exception as e:
@@ -216,8 +180,8 @@ def acs_social_state_pull_tool(state_fips: str, year: Optional[str] = None) -> D
         raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
 
 @mcp.tool()
-def acs_economic_state_pull_tool(state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls state-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_economic_state_pull_tool(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls state-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple states in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_economic_state_pull(state_fips, year)
     except Exception as e:
@@ -225,8 +189,8 @@ def acs_economic_state_pull_tool(state_fips: str, year: Optional[str] = None) ->
         raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
 
 @mcp.tool()
-def acs_housing_state_pull_tool(state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
-    """Pulls state-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
+def acs_housing_state_pull_tool(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls state-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple states in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_housing_state_pull(state_fips, year)
     except Exception as e:
@@ -369,35 +333,48 @@ def create_app_with_endpoints():
 
 def main():
     """Main function to run the MCP server"""
-    if len(sys.argv) > 1 and sys.argv[1] == "--stdio":
-        logger.info("Starting MCP server with stdio transport")
-        mcp.run(transport="stdio")
-    elif len(sys.argv) > 1 and sys.argv[1] == "--web":
-        # For Cloud Run deployment
-        app = create_app_with_endpoints()
-        port = int(os.getenv("PORT", SERVER_CONFIG["port"]))
-        logger.info(f"Starting MCP server on port {port}")
-        uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
-    else:
-        print(f"Starting {SERVER_CONFIG['name']} v{SERVER_CONFIG['version']}")
-        print(f"Available tools: {list(TOOL_CONFIGS.keys())}")
-        print(f"Available prompts: {list(PROMPT_CONFIGS.keys())}")
-        print(f"Available resources: {list(RESOURCE_CONFIGS.keys())}")
-        print("\nUsage:")
-        print("  python server.py --stdio  (for local MCP client connections)")
-        print("  python server.py --web    (for web deployment like Cloud Run)")
-        print("  mcp dev server.py         (for local development with inspector)")
+    try:
+        logger.info("MCP Server starting up...")
+        logger.info(f"Environment - PORT: {os.getenv('PORT')}, MCP_TRANSPORT: {os.getenv('MCP_TRANSPORT')}")
+        logger.info(f"Command line args: {sys.argv}")
         
-        # Default to checking environment variable like the working server
-        transport = os.getenv("MCP_TRANSPORT", "stdio")
-        if transport == "streamable-http":
+        if len(sys.argv) > 1 and sys.argv[1] == "--stdio":
+            logger.info("Starting MCP server with stdio transport")
+            mcp.run(transport="stdio")
+        elif len(sys.argv) > 1 and sys.argv[1] == "--web":
+            # For Cloud Run deployment
+            logger.info("Creating app with endpoints...")
             app = create_app_with_endpoints()
             port = int(os.getenv("PORT", SERVER_CONFIG["port"]))
             logger.info(f"Starting MCP server on port {port}")
             uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
         else:
-            logger.info("Starting MCP server with stdio transport")
-            mcp.run(transport="stdio")
+            print(f"Starting {SERVER_CONFIG['name']} v{SERVER_CONFIG['version']}")
+            print(f"Available tools: {list(TOOL_CONFIGS.keys())}")
+            print(f"Available prompts: {list(PROMPT_CONFIGS.keys())}")
+            print(f"Available resources: {list(RESOURCE_CONFIGS.keys())}")
+            print("\nUsage:")
+            print("  python server.py --stdio  (for local MCP client connections)")
+            print("  python server.py --web    (for web deployment like Cloud Run)")
+            print("  mcp dev server.py         (for local development with inspector)")
+            
+            # Default to checking environment variable like the working server
+            transport = os.getenv("MCP_TRANSPORT", "stdio")
+            logger.info(f"Transport mode: {transport}")
+            if transport == "streamable-http":
+                logger.info("Creating app with endpoints...")
+                app = create_app_with_endpoints()
+                port = int(os.getenv("PORT", SERVER_CONFIG["port"]))
+                logger.info(f"Starting MCP server on port {port}")
+                uvicorn.run(app, host="0.0.0.0", port=port, log_level="info")
+            else:
+                logger.info("Starting MCP server with stdio transport")
+                mcp.run(transport="stdio")
+    except Exception as e:
+        logger.error(f"Failed to start server: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise
 
 if __name__ == "__main__":
     main()

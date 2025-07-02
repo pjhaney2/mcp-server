@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Dict, Optional, Union, Any
+from typing import Dict, Optional, Union, Any, List
 import requests
 
 def acs_social_state_pull(
-    state_fips: str, 
+    state_fips: List[str], 
     year: Optional[str] = None
 ) -> Dict[str, Any]:
     """
@@ -15,7 +15,8 @@ def acs_social_state_pull(
     Total Population is found under PLACE OF BIRTH category.
 
     Args:
-        state_fips (str): The FIPS code for the state (e.g., "17" for Illinois)
+        state_fips (List[str]): The FIPS code(s) for the state(s). 
+                                List of strings (e.g., ["17"] or ["17", "06"])
         year (Optional[str]): Year of ACS data. Defaults to current year minus 2. Must be 2010 or later.
 
     Returns:
@@ -30,8 +31,16 @@ def acs_social_state_pull(
 
         # Validate inputs
         
-        if not isinstance(state_fips, str) or not state_fips.isdigit():
-            return _error_response("state_fips must be a string of digits.")
+        # Handle state_fips as list
+        if not isinstance(state_fips, list):
+            return _error_response("state_fips must be a list of strings.")
+        
+        state_fips_list = state_fips
+        
+        # Validate all state_fips codes
+        for fips in state_fips_list:
+            if not isinstance(fips, str) or not fips.isdigit():
+                return _error_response("All state_fips must be strings of digits.")
 
         # Handle year parameter and validate
         if year is not None:
@@ -47,9 +56,12 @@ def acs_social_state_pull(
         else:
             target_year = str(datetime.now().year - 2)
         
+        # Create comma-separated string for multiple FIPS codes
+        state_fips_str = ",".join(state_fips_list)
+        
         params = {
             "get": f"NAME,group(DP02)",
-            "for": f"state:{state_fips}",
+            "for": f"state:{state_fips_str}",
             "key":"091b3e6e230ae7273599c133be45cec90de9e80a",
             "descriptive": "true",
         }
