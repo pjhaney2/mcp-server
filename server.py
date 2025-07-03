@@ -3,7 +3,7 @@
 MCP Demo Server using FastMCP
 Supports both local stdio and remote streamable-http transports
 
-This server provides calculator tools, pirate talk prompts, and PDF resources.
+This server provides calculator tools and PDF resources.
 """
 import os
 import sys
@@ -46,7 +46,7 @@ from tools.oews_data.oews_soc import search_oews_soc
 from tools.qcew_data.qcew_data import get_qcew_data
 from tools.qcew_data.qcew_fips import search_qcew_fips
 from tools.qcew_data.qcew_naics import search_qcew_naics
-from prompts.pirate_talk import get_pirate_prompt
+from prompts.case_study_creator import get_case_study_prompt
 
 # Set up logging
 logging.basicConfig(
@@ -60,7 +60,7 @@ mcp = FastMCP(SERVER_CONFIG["name"])
 
 
 @mcp.tool()
-def acs_social_county_pull_tool(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_county_social_data(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls county-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple counties in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_social_county_pull(geo_fips, state_fips, year)
@@ -69,7 +69,7 @@ def acs_social_county_pull_tool(geo_fips: List[str], state_fips: str, year: Opti
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_economic_county_pull_tool(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_county_economic_data(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls county-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple counties in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_economic_county_pull(geo_fips, state_fips, year)
@@ -78,7 +78,7 @@ def acs_economic_county_pull_tool(geo_fips: List[str], state_fips: str, year: Op
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_housing_county_pull_tool(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_county_housing_data(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls county-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple counties in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_housing_county_pull(geo_fips, state_fips, year)
@@ -87,7 +87,7 @@ def acs_housing_county_pull_tool(geo_fips: List[str], state_fips: str, year: Opt
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_social_place_pull_tool(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_place_social_data(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls place-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple places in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_social_place_pull(place_fips, state_fips, year)
@@ -96,7 +96,7 @@ def acs_social_place_pull_tool(place_fips: List[str], state_fips: str, year: Opt
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_economic_place_pull_tool(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_place_economic_data(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls place-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple places in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_economic_place_pull(place_fips, state_fips, year)
@@ -105,7 +105,7 @@ def acs_economic_place_pull_tool(place_fips: List[str], state_fips: str, year: O
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def acs_housing_place_pull_tool(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_place_housing_data(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls place-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple places in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_housing_place_pull(place_fips, state_fips, year)
@@ -114,7 +114,7 @@ def acs_housing_place_pull_tool(place_fips: List[str], state_fips: str, year: Op
         raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
 
 @mcp.tool()
-def search_county_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def lookup_county_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """Search for counties by keyword(s) and return their FIPS codes"""
     try:
         return search_county_fips(keyword, max_results)
@@ -123,7 +123,7 @@ def search_county_fips_tool(keyword: List[str], max_results: Optional[int] = 20)
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def search_place_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def lookup_place_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """Search for places (cities, towns, CDPs) by keyword(s) and return their FIPS codes"""
     try:
         return search_place_fips(keyword, max_results)
@@ -132,7 +132,7 @@ def search_place_fips_tool(keyword: List[str], max_results: Optional[int] = 20) 
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def search_msa_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def lookup_msa_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """Search for MSA/Micropolitan areas by keyword(s) and return their FIPS codes"""
     try:
         return search_msa_fips(keyword, max_results)
@@ -141,7 +141,7 @@ def search_msa_fips_tool(keyword: List[str], max_results: Optional[int] = 20) ->
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def search_state_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def lookup_state_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """Search for states by keyword(s) and return their FIPS codes"""
     try:
         return search_state_fips(keyword, max_results)
@@ -150,7 +150,7 @@ def search_state_fips_tool(keyword: List[str], max_results: Optional[int] = 20) 
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def acs_social_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_msa_social_data(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls MSA/Micropolitan area-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple MSAs in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_social_msa_pull(msa_fips, year)
@@ -159,7 +159,7 @@ def acs_social_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) ->
         raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
 
 @mcp.tool()
-def acs_economic_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_msa_economic_data(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls MSA/Micropolitan area-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple MSAs in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_economic_msa_pull(msa_fips, year)
@@ -168,7 +168,7 @@ def acs_economic_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) 
         raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
 
 @mcp.tool()
-def acs_housing_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_msa_housing_data(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls MSA/Micropolitan area-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple MSAs in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_housing_msa_pull(msa_fips, year)
@@ -177,7 +177,7 @@ def acs_housing_msa_pull_tool(msa_fips: List[str], year: Optional[str] = None) -
         raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
 
 @mcp.tool()
-def acs_social_state_pull_tool(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_state_social_data(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls state-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple states in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_social_state_pull(state_fips, year)
@@ -186,7 +186,7 @@ def acs_social_state_pull_tool(state_fips: List[str], year: Optional[str] = None
         raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
 
 @mcp.tool()
-def acs_economic_state_pull_tool(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_state_economic_data(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls state-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple states in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_economic_state_pull(state_fips, year)
@@ -195,7 +195,7 @@ def acs_economic_state_pull_tool(state_fips: List[str], year: Optional[str] = No
         raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
 
 @mcp.tool()
-def acs_housing_state_pull_tool(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_state_housing_data(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls state-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates. Supports multiple states in a single request by passing multiple FIPS codes in the array."""
     try:
         return acs_housing_state_pull(state_fips, year)
@@ -204,7 +204,7 @@ def acs_housing_state_pull_tool(state_fips: List[str], year: Optional[str] = Non
         raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
 
 @mcp.tool()
-def acs_social_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_national_social_data(year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls national-level social characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
     try:
         return acs_social_national_pull(year)
@@ -213,7 +213,7 @@ def acs_social_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]:
         raise ValueError("Invalid input: Please provide valid optional year")
 
 @mcp.tool()
-def acs_economic_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_national_economic_data(year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls national-level economic characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
     try:
         return acs_economic_national_pull(year)
@@ -222,7 +222,7 @@ def acs_economic_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any
         raise ValueError("Invalid input: Please provide valid optional year")
 
 @mcp.tool()
-def acs_housing_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]:
+def get_acs_national_housing_data(year: Optional[str] = None) -> Dict[str, Any]:
     """Pulls national-level housing characteristics data from the US Census Bureau's American Community Survey (ACS) 5-year estimates"""
     try:
         return acs_housing_national_pull(year)
@@ -231,7 +231,7 @@ def acs_housing_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]
         raise ValueError("Invalid input: Please provide valid optional year")
 
 @mcp.tool()
-def get_oews_data_tool(geo_codes: List[str], occ_codes: List[str]) -> Dict[str, Any]:
+def get_oews_occupation_wage_data(geo_codes: List[str], occ_codes: List[str]) -> Dict[str, Any]:
     """Get simplified OEWS occupation and wage data for multiple locations and occupations with location quotients. Uses BLS OEWS API to fetch employment and wage data."""
     try:
         return get_oews_data(geo_codes, occ_codes)
@@ -240,7 +240,7 @@ def get_oews_data_tool(geo_codes: List[str], occ_codes: List[str]) -> Dict[str, 
         raise ValueError("Invalid input: Please provide valid geographic area codes and occupation codes")
 
 @mcp.tool()
-def search_oews_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def lookup_oews_area_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """Search for OEWS geographic areas by keyword(s) and return their FIPS codes. Includes states, metros, and nonmetropolitan areas."""
     try:
         return search_oews_fips(keyword, max_results)
@@ -249,7 +249,7 @@ def search_oews_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def search_oews_soc_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def lookup_oews_occupation_codes(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """Search for occupations by keyword(s) and return their SOC (Standard Occupational Classification) codes. Find jobs and careers by title or description."""
     try:
         return search_oews_soc(keyword, max_results)
@@ -258,7 +258,7 @@ def search_oews_soc_tool(keyword: List[str], max_results: Optional[int] = 20) ->
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def get_qcew_data_tool(geo_codes: List[str], industry_codes: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+def get_qcew_industry_employment_data(geo_codes: List[str], industry_codes: List[str], year: Optional[str] = None) -> Dict[str, Any]:
     """Get simplified QCEW industry establishment and employee data for multiple locations and industries with location quotients. Uses BLS QCEW API to fetch employment and establishment data. Optionally specify a year for historical data."""
     try:
         return get_qcew_data(geo_codes, industry_codes, year)
@@ -267,7 +267,7 @@ def get_qcew_data_tool(geo_codes: List[str], industry_codes: List[str], year: Op
         raise ValueError("Invalid input: Please provide valid geographic area codes, industry codes, and optional year")
 
 @mcp.tool()
-def search_qcew_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+def lookup_qcew_area_fips(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
     """Search for QCEW geographic areas by keyword(s) and return their FIPS codes. Includes counties, states, and other geographic areas used in QCEW data."""
     try:
         return search_qcew_fips(keyword, max_results)
@@ -276,7 +276,7 @@ def search_qcew_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.tool()
-def search_qcew_naics_tool(keyword: List[str]) -> List[Tuple[str, str]]:
+def lookup_qcew_industry_codes(keyword: List[str]) -> List[Tuple[str, str]]:
     """Search for industries by keyword(s) and return their NAICS (North American Industry Classification System) codes. Find industries by name or description."""
     try:
         return search_qcew_naics(keyword)
@@ -284,18 +284,25 @@ def search_qcew_naics_tool(keyword: List[str]) -> List[Tuple[str, str]]:
         logger.error(f"Error in search_qcew_naics: {e}")
         raise ValueError("Invalid input: Please provide a valid search keyword")
 
-@mcp.prompt(name="pirate_talk", description="Transform text to sound like a pirate")
-def pirate_talk(text: str) -> list:
-    """Transform text to sound like a pirate"""
+
+@mcp.prompt(name="case_study_creator", description="Create a one-page case study from reports or documents")
+def create_case_study(client_name: str = "the client", focus_area: str = "general") -> list:
+    """Generate a professional case study from provided documents"""
     try:
-        if not text or not text.strip():
-            raise ValueError("Text cannot be empty")
+        # Validate inputs
+        if not client_name or not client_name.strip():
+            client_name = "the client"
+        if not focus_area or not focus_area.strip():
+            focus_area = "general"
         
-        prompt_content = get_pirate_prompt(text.strip())
+        prompt_content = get_case_study_prompt(
+            client_name.strip(),
+            focus_area.strip()
+        )
         
         return [
             {
-                "role": "user", 
+                "role": "user",
                 "content": {
                     "type": "text",
                     "text": prompt_content
@@ -303,8 +310,8 @@ def pirate_talk(text: str) -> list:
             }
         ]
     except Exception as e:
-        logger.error(f"Error in pirate_talk: {e}")
-        raise ValueError("Invalid input: Please provide valid text")
+        logger.error(f"Error in case_study_creator: {e}")
+        raise ValueError("Invalid input: Please provide valid parameters for case study creation")
 
 @mcp.resource("waupaca://report")
 def get_waupaca_report() -> str:

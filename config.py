@@ -396,15 +396,6 @@ TOOL_CONFIGS = {
 }
 
 PROMPT_CONFIGS = {
-    "pirate_talk": {
-        "name": "Pirate Talk",
-        "description": "Transform text to sound like a pirate",
-        "template": """Transform the following text to sound like a pirate would speak. Use pirate vocabulary like 'ahoy', 'matey', 'arr', 'ye', 'me hearties', etc. Make it sound authentic but fun.
-
-Text to transform: {text}
-
-Pirate version:"""
-    }
 }
 
 RESOURCE_CONFIGS = {
