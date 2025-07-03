@@ -308,6 +308,90 @@ TOOL_CONFIGS = {
                 }
             }
         ]
+    },
+    "oews_data": {
+        "name": "OEWS Employment and Wage Data",
+        "description": "Get occupation employment and wage statistics from the Bureau of Labor Statistics OEWS program with location quotients",
+        "tools": [
+            {
+                "name": "get_oews_data",
+                "description": "Get simplified OEWS occupation and wage data for multiple locations and occupations with location quotients",
+                "parameters": {
+                    "geo_codes": {"type": "array", "items": {"type": "string"}, "description": "Geographic area codes (e.g., ['0600000'] for California, ['0000000'] for national, ['0016980'] for Chicago metro). Array of strings for multiple locations"},
+                    "occ_codes": {"type": "array", "items": {"type": "string"}, "description": "SOC occupation codes (e.g., ['111011'] for Chief Executives, ['151252'] for Software Developers). Array of strings for multiple occupations"}
+                }
+            }
+        ]
+    },
+    "oews_fips_search": {
+        "name": "OEWS Geographic Area Search",
+        "description": "Search for OEWS geographic area FIPS codes by area name keyword(s)",
+        "tools": [
+            {
+                "name": "search_oews_fips",
+                "description": "Search for OEWS geographic areas by keyword(s) and return their FIPS codes",
+                "parameters": {
+                    "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against area names (case-insensitive). Array of strings (e.g., ['california', 'texas']) for multiple searches, or single string ['california'] for one search"},
+                    "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
+                }
+            }
+        ]
+    },
+    "oews_soc_search": {
+        "name": "OEWS Occupation Search",
+        "description": "Search for SOC occupation codes by occupation title keyword(s)",
+        "tools": [
+            {
+                "name": "search_oews_soc",
+                "description": "Search for occupations by keyword(s) and return their SOC codes",
+                "parameters": {
+                    "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against occupation titles (case-insensitive). Array of strings (e.g., ['software', 'manager']) for multiple searches, or single string ['software'] for one search"},
+                    "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
+                }
+            }
+        ]
+    },
+    "qcew_data": {
+        "name": "QCEW Employment and Establishment Data",
+        "description": "Get industry employment and establishment statistics from the Bureau of Labor Statistics QCEW program with location quotients",
+        "tools": [
+            {
+                "name": "get_qcew_data",
+                "description": "Get simplified QCEW industry establishment and employee data for multiple locations and industries with location quotients",
+                "parameters": {
+                    "geo_codes": {"type": "array", "items": {"type": "string"}, "description": "Geographic area codes (e.g., ['17043'] for DuPage County IL, ['US000'] for national, ['06'] for California state). Array of strings for multiple locations"},
+                    "industry_codes": {"type": "array", "items": {"type": "string"}, "description": "NAICS industry codes (e.g., ['1013'] for Manufacturing, ['10'] for Total All Industries). Array of strings for multiple industries"},
+                    "year": {"type": "string", "description": "Specific year for historical data (optional, defaults to latest available)", "optional": True}
+                }
+            }
+        ]
+    },
+    "qcew_fips_search": {
+        "name": "QCEW Geographic Area Search",
+        "description": "Search for QCEW geographic area FIPS codes by area name keyword(s)",
+        "tools": [
+            {
+                "name": "search_qcew_fips",
+                "description": "Search for QCEW geographic areas by keyword(s) and return their FIPS codes",
+                "parameters": {
+                    "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against area names (case-insensitive). Array of strings (e.g., ['chicago', 'illinois']) for multiple searches, or single string ['chicago'] for one search"},
+                    "max_results": {"type": "integer", "description": "Maximum number of results to return (default: 20)", "optional": True}
+                }
+            }
+        ]
+    },
+    "qcew_naics_search": {
+        "name": "QCEW Industry Search",
+        "description": "Search for NAICS industry codes by industry name keyword(s)",
+        "tools": [
+            {
+                "name": "search_qcew_naics",
+                "description": "Search for industries by keyword(s) and return their NAICS codes",
+                "parameters": {
+                    "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against industry names (case-insensitive). Array of strings (e.g., ['manufacturing', 'retail']) for multiple searches, or single string ['manufacturing'] for one search"}
+                }
+            }
+        ]
     }
 }
 

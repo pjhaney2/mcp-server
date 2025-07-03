@@ -40,6 +40,12 @@ from tools.acs_data.acs_county_fips import search_county_fips
 from tools.acs_data.acs_place_fips import search_place_fips
 from tools.acs_data.acs_msa_fips import search_msa_fips
 from tools.acs_data.acs_state_fips import search_state_fips
+from tools.oews_data.oews_data import get_oews_data
+from tools.oews_data.oews_fips import search_oews_fips
+from tools.oews_data.oews_soc import search_oews_soc
+from tools.qcew_data.qcew_data import get_qcew_data
+from tools.qcew_data.qcew_fips import search_qcew_fips
+from tools.qcew_data.qcew_naics import search_qcew_naics
 from prompts.pirate_talk import get_pirate_prompt
 
 # Set up logging
@@ -223,6 +229,60 @@ def acs_housing_national_pull_tool(year: Optional[str] = None) -> Dict[str, Any]
     except Exception as e:
         logger.error(f"Error in acs_housing_national_pull: {e}")
         raise ValueError("Invalid input: Please provide valid optional year")
+
+@mcp.tool()
+def get_oews_data_tool(geo_codes: List[str], occ_codes: List[str]) -> Dict[str, Any]:
+    """Get simplified OEWS occupation and wage data for multiple locations and occupations with location quotients. Uses BLS OEWS API to fetch employment and wage data."""
+    try:
+        return get_oews_data(geo_codes, occ_codes)
+    except Exception as e:
+        logger.error(f"Error in get_oews_data: {e}")
+        raise ValueError("Invalid input: Please provide valid geographic area codes and occupation codes")
+
+@mcp.tool()
+def search_oews_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for OEWS geographic areas by keyword(s) and return their FIPS codes. Includes states, metros, and nonmetropolitan areas."""
+    try:
+        return search_oews_fips(keyword, max_results)
+    except Exception as e:
+        logger.error(f"Error in search_oews_fips: {e}")
+        raise ValueError("Invalid input: Please provide a valid search keyword")
+
+@mcp.tool()
+def search_oews_soc_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for occupations by keyword(s) and return their SOC (Standard Occupational Classification) codes. Find jobs and careers by title or description."""
+    try:
+        return search_oews_soc(keyword, max_results)
+    except Exception as e:
+        logger.error(f"Error in search_oews_soc: {e}")
+        raise ValueError("Invalid input: Please provide a valid search keyword")
+
+@mcp.tool()
+def get_qcew_data_tool(geo_codes: List[str], industry_codes: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Get simplified QCEW industry establishment and employee data for multiple locations and industries with location quotients. Uses BLS QCEW API to fetch employment and establishment data. Optionally specify a year for historical data."""
+    try:
+        return get_qcew_data(geo_codes, industry_codes, year)
+    except Exception as e:
+        logger.error(f"Error in get_qcew_data: {e}")
+        raise ValueError("Invalid input: Please provide valid geographic area codes, industry codes, and optional year")
+
+@mcp.tool()
+def search_qcew_fips_tool(keyword: List[str], max_results: Optional[int] = 20) -> List[Tuple[str, str]]:
+    """Search for QCEW geographic areas by keyword(s) and return their FIPS codes. Includes counties, states, and other geographic areas used in QCEW data."""
+    try:
+        return search_qcew_fips(keyword, max_results)
+    except Exception as e:
+        logger.error(f"Error in search_qcew_fips: {e}")
+        raise ValueError("Invalid input: Please provide a valid search keyword")
+
+@mcp.tool()
+def search_qcew_naics_tool(keyword: List[str]) -> List[Tuple[str, str]]:
+    """Search for industries by keyword(s) and return their NAICS (North American Industry Classification System) codes. Find industries by name or description."""
+    try:
+        return search_qcew_naics(keyword)
+    except Exception as e:
+        logger.error(f"Error in search_qcew_naics: {e}")
+        raise ValueError("Invalid input: Please provide a valid search keyword")
 
 @mcp.prompt(name="pirate_talk", description="Transform text to sound like a pirate")
 def pirate_talk(text: str) -> list:
