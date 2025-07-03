@@ -309,6 +309,77 @@ TOOL_CONFIGS = {
             }
         ]
     },
+    "acs_demographics_county": {
+        "name": "ACS Demographics County Data",
+        "description": "Pulls data from the US Census Bureau's American Community Survey (ACS) 5-year estimates for county-level demographic characteristics",
+        "tools": [
+            {
+                "name": "acs_demographics_county_pull",
+                "description": "Pulls county-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population",
+                "parameters": {
+                    "geo_fips": {"type": "array", "items": {"type": "string"}, "description": "County FIPS code(s). Array of strings (e.g., ['031'] for single county or ['031', '045'] for multiple counties)"}, 
+                    "state_fips": {"type": "string", "description": "State FIPS code(s) as a STRING. Use '17' for single state or '17,06' for multiple states (comma-separated, no spaces, NO ARRAYS)"},
+                    "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
+                }
+            }
+        ]
+    },
+    "acs_demographics_place": {
+        "name": "ACS Demographics Place Data",
+        "description": "Pulls data from the US Census Bureau's American Community Survey (ACS) 5-year estimates for place-level demographic characteristics",
+        "tools": [
+            {
+                "name": "acs_demographics_place_pull",
+                "description": "Pulls place-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population",
+                "parameters": {
+                    "place_fips": {"type": "array", "items": {"type": "string"}, "description": "Place FIPS code(s). Array of strings (e.g., ['14000'] for single place or ['14000', '51000'] for multiple places)"}, 
+                    "state_fips": {"type": "string", "description": "State FIPS code(s) as a STRING. Use '17' for single state or '17,06' for multiple states (comma-separated, no spaces, NO ARRAYS)"},
+                    "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
+                }
+            }
+        ]
+    },
+    "acs_demographics_msa": {
+        "name": "ACS Demographics MSA Data",
+        "description": "Pulls data from the US Census Bureau's American Community Survey (ACS) 5-year estimates for MSA/Micropolitan area-level demographic characteristics",
+        "tools": [
+            {
+                "name": "acs_demographics_msa_pull",
+                "description": "Pulls MSA/Micropolitan area-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population",
+                "parameters": {
+                    "msa_fips": {"type": "array", "items": {"type": "string"}, "description": "MSA/Micropolitan area FIPS code(s). Array of strings (e.g., ['16980'] for single area or ['16980', '35620'] for multiple areas)"}, 
+                    "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
+                }
+            }
+        ]
+    },
+    "acs_demographics_state": {
+        "name": "ACS Demographics State Data",
+        "description": "Pulls data from the US Census Bureau's American Community Survey (ACS) 5-year estimates for state-level demographic characteristics",
+        "tools": [
+            {
+                "name": "acs_demographics_state_pull",
+                "description": "Pulls state-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population",
+                "parameters": {
+                    "state_fips": {"type": "array", "items": {"type": "string"}, "description": "State FIPS code(s). Array of strings (e.g., ['17'] for single state or ['17', '06'] for multiple states)"}, 
+                    "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
+                }
+            }
+        ]
+    },
+    "acs_demographics_national": {
+        "name": "ACS Demographics National Data",
+        "description": "Pulls data from the US Census Bureau's American Community Survey (ACS) 5-year estimates for national-level demographic characteristics",
+        "tools": [
+            {
+                "name": "acs_demographics_national_pull",
+                "description": "Pulls national-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population",
+                "parameters": {
+                    "year": {"type": "string", "description": "Year for data (optional, defaults to most recent available)", "optional": True}
+                }
+            }
+        ]
+    },
     "oews_data": {
         "name": "OEWS Employment and Wage Data",
         "description": "Get occupation employment and wage statistics from the Bureau of Labor Statistics OEWS program with location quotients",
@@ -389,6 +460,40 @@ TOOL_CONFIGS = {
                 "description": "Search for industries by keyword(s) and return their NAICS codes",
                 "parameters": {
                     "keyword": {"type": "array", "items": {"type": "string"}, "description": "Search term(s) to match against industry names (case-insensitive). Array of strings (e.g., ['manufacturing', 'retail']) for multiple searches, or single string ['manufacturing'] for one search"}
+                }
+            }
+        ]
+    },
+    "rank_acs_data_high": {
+        "name": "Rank ACS Data High",
+        "description": "Find geographic areas with the highest values for a specific ACS data point",
+        "tools": [
+            {
+                "name": "rank_acs_data_high",
+                "description": "Find geographic areas (places, counties, states, MSAs) with the highest values for a specified ACS data point",
+                "parameters": {
+                    "data_point": {"type": "string", "description": "The ACS data point/variable to sort by (e.g., 'DP02_0001E', 'DP03_0062E')"},
+                    "geo_type": {"type": "string", "description": "The geographic type to query ('place', 'county', 'state', 'metropolitan statistical area/micropolitan statistical area')"},
+                    "state_fips": {"type": "string", "description": "The FIPS code for the state to limit results to. If not provided, queries all areas. Note: Not applicable for MSA queries.", "optional": True},
+                    "year": {"type": "string", "description": "Year of ACS data (optional, defaults to most recent available)", "optional": True},
+                    "limit": {"type": "integer", "description": "Number of top results to return (default: 20, max: 100)", "optional": True}
+                }
+            }
+        ]
+    },
+    "rank_acs_data_low": {
+        "name": "Rank ACS Data Low",
+        "description": "Find geographic areas with the lowest values for a specific ACS data point",
+        "tools": [
+            {
+                "name": "rank_acs_data_low", 
+                "description": "Find geographic areas (places, counties, states, MSAs) with the lowest values for a specified ACS data point",
+                "parameters": {
+                    "data_point": {"type": "string", "description": "The ACS data point/variable to sort by (e.g., 'DP02_0001E', 'DP03_0062E')"},
+                    "geo_type": {"type": "string", "description": "The geographic type to query ('place', 'county', 'state', 'metropolitan statistical area/micropolitan statistical area')"},
+                    "state_fips": {"type": "string", "description": "The FIPS code for the state to limit results to. If not provided, queries all areas. Note: Not applicable for MSA queries.", "optional": True},
+                    "year": {"type": "string", "description": "Year of ACS data (optional, defaults to most recent available)", "optional": True},
+                    "limit": {"type": "integer", "description": "Number of lowest results to return (default: 20, max: 100)", "optional": True}
                 }
             }
         ]

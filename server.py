@@ -36,16 +36,23 @@ from tools.acs_data.acs_housing_state import acs_housing_state_pull
 from tools.acs_data.acs_social_national import acs_social_national_pull
 from tools.acs_data.acs_economic_national import acs_economic_national_pull
 from tools.acs_data.acs_housing_national import acs_housing_national_pull
-from tools.acs_data.acs_county_fips import search_county_fips
-from tools.acs_data.acs_place_fips import search_place_fips
-from tools.acs_data.acs_msa_fips import search_msa_fips
-from tools.acs_data.acs_state_fips import search_state_fips
+from tools.acs_data.fips_acs_county import search_county_fips
+from tools.acs_data.fips_acs_place import search_place_fips
+from tools.acs_data.fips_acs_msa import search_msa_fips
+from tools.acs_data.fips_acs_state import search_state_fips
 from tools.oews_data.oews_data import get_oews_data
 from tools.oews_data.oews_fips import search_oews_fips
 from tools.oews_data.oews_soc import search_oews_soc
 from tools.qcew_data.qcew_data import get_qcew_data
 from tools.qcew_data.qcew_fips import search_qcew_fips
 from tools.qcew_data.qcew_naics import search_qcew_naics
+from tools.acs_data.rank_acs_data_high import rank_acs_data_high
+from tools.acs_data.rank_acs_data_low import rank_acs_data_low
+from tools.acs_data.acs_demographics_county import acs_demographics_county_pull
+from tools.acs_data.acs_demographics_place import acs_demographics_place_pull
+from tools.acs_data.acs_demographics_msa import acs_demographics_msa_pull
+from tools.acs_data.acs_demographics_state import acs_demographics_state_pull
+from tools.acs_data.acs_demographics_national import acs_demographics_national_pull
 from prompts.case_study_creator import get_case_study_prompt
 
 # Set up logging
@@ -283,6 +290,69 @@ def lookup_qcew_industry_codes(keyword: List[str]) -> List[Tuple[str, str]]:
     except Exception as e:
         logger.error(f"Error in search_qcew_naics: {e}")
         raise ValueError("Invalid input: Please provide a valid search keyword")
+
+@mcp.tool()
+def rank_acs_data_highest(data_point: str, geo_type: str, state_fips: Optional[str] = None, year: Optional[str] = None, limit: Optional[int] = 20) -> Dict[str, Any]:
+    """Find geographic areas (places, counties, states, MSAs) with the highest values for a specified ACS data point. Returns areas ranked by highest values."""
+    try:
+        return rank_acs_data_high(data_point, geo_type, state_fips, year, limit)
+    except Exception as e:
+        logger.error(f"Error in rank_acs_data_high: {e}")
+        raise ValueError("Invalid input: Please provide valid parameters for ACS data ranking")
+
+@mcp.tool()
+def rank_acs_data_lowest(data_point: str, geo_type: str, state_fips: Optional[str] = None, year: Optional[str] = None, limit: Optional[int] = 20) -> Dict[str, Any]:
+    """Find geographic areas (places, counties, states, MSAs) with the lowest values for a specified ACS data point. Returns areas ranked by lowest values."""
+    try:
+        return rank_acs_data_low(data_point, geo_type, state_fips, year, limit)
+    except Exception as e:
+        logger.error(f"Error in rank_acs_data_low: {e}")
+        raise ValueError("Invalid input: Please provide valid parameters for ACS data ranking")
+
+@mcp.tool()
+def get_acs_county_demographics_data(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls county-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population from the US Census Bureau's American Community Survey (ACS) 5-year estimates."""
+    try:
+        return acs_demographics_county_pull(geo_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_demographics_county_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
+def get_acs_place_demographics_data(place_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls place-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population from the US Census Bureau's American Community Survey (ACS) 5-year estimates."""
+    try:
+        return acs_demographics_place_pull(place_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_demographics_place_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
+def get_acs_msa_demographics_data(msa_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls MSA/Micropolitan area-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population from the US Census Bureau's American Community Survey (ACS) 5-year estimates."""
+    try:
+        return acs_demographics_msa_pull(msa_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_demographics_msa_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid MSA FIPS code and optional year")
+
+@mcp.tool()
+def get_acs_state_demographics_data(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls state-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population from the US Census Bureau's American Community Survey (ACS) 5-year estimates."""
+    try:
+        return acs_demographics_state_pull(state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in acs_demographics_state_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid state FIPS code and optional year")
+
+@mcp.tool()
+def get_acs_national_demographics_data(year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls national-level demographic data including total population, sex (male/female distribution), age distribution, race, and voting age population from the US Census Bureau's American Community Survey (ACS) 5-year estimates."""
+    try:
+        return acs_demographics_national_pull(year)
+    except Exception as e:
+        logger.error(f"Error in acs_demographics_national_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid optional year")
 
 
 @mcp.prompt(name="case_study_creator", description="Create a one-page case study from reports or documents")
