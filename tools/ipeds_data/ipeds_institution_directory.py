@@ -104,6 +104,3 @@ def get_postsecondary_institutions(
         'cbsa': inst.get('cbsa', ''),
         'inst_category': inst.get('inst_category', ''),
     } for inst in results]
-
-if __name__ == "__main__":
-    print(get_postsecondary_institutions(state_fips="17", county_fips="031", inst_category=2))

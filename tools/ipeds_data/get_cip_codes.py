@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 
 # CIP Code Dictionary
 CIP_CODES = {
@@ -103,6 +103,3 @@ def get_cip_codes(
         results = [item for item in results if search_lower in item['name'].lower()]
     
     return results
-
-if __name__ == "__main__":
-    print(get_cip_codes())

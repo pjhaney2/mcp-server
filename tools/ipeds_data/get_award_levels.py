@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 
 # Award Level Dictionary
 AWARD_LEVELS = {
@@ -66,6 +66,3 @@ def get_award_levels(
         results = [item for item in results if search_lower in item['name'].lower()]
     
     return results
-
-if __name__ == "__main__":
-    print(get_award_levels())

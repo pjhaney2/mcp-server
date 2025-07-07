@@ -2,13 +2,10 @@
 #https://educationdata.urban.org/documentation/colleges.html#ipeds_directory
 
 import requests
-import logging
 from typing import List, Dict, Optional, Any
 from datetime import datetime
 from .get_cip_codes import CIP_CODES
 from .get_award_levels import AWARD_LEVELS
-
-logger = logging.getLogger(__name__)
 
 def get_programs(
     state_fips: Optional[List[str]] = None,
@@ -61,21 +58,15 @@ def get_programs(
     
     # Add timeout and handle large responses
     try:
-        logger.info(f"Fetching IPEDS program data from: {url}")
-        logger.info(f"Parameters: {params}")
         response = requests.get(url, params=params, timeout=30)
         response.raise_for_status()
         data = response.json()
         results = data.get('results', [])
-        logger.info(f"Received {len(results)} program records")
     except requests.exceptions.Timeout:
-        logger.error("IPEDS program data request timed out")
         return [{"error": "Request timed out - try filtering by specific award levels or narrowing your search"}]
     except requests.exceptions.RequestException as e:
-        logger.error(f"IPEDS program data request failed: {str(e)}")
         return [{"error": f"Request failed: {str(e)}"}]
     except Exception as e:
-        logger.error(f"Unexpected error in get_programs: {str(e)}")
         return [{"error": f"Unexpected error: {str(e)}"}]
     
     # Filter out records with 0 awards
@@ -88,12 +79,9 @@ def get_programs(
                           if any(keyword in CIP_CODES.get(str(inst.get('cipcode', '')), '').lower() 
                                 for keyword in keyword_list_lower)]
     
-    logger.info(f"After filtering: {len(filtered_results)} records remain")
-    
     # Limit results to prevent memory issues
     max_results = 1000
     if len(filtered_results) > max_results:
-        logger.warning(f"Limiting results from {len(filtered_results)} to {max_results} to prevent memory issues")
         filtered_results = filtered_results[:max_results]
     
     # Process results in a more memory-efficient way
@@ -108,12 +96,7 @@ def get_programs(
                 'award_level_name': AWARD_LEVELS.get(str(inst.get('award_level', '')), 'Unknown Award Level'),
                 'awards': inst.get('awards', ''),
             })
-        except Exception as e:
-            logger.error(f"Error processing record: {e}")
+        except Exception:
             continue
     
-    logger.info(f"Successfully processed {len(processed_results)} records")
     return processed_results
-
-if __name__ == "__main__":
-    print(get_programs(state_fips="17"))
