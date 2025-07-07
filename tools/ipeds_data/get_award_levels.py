@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 
 # Award Level Dictionary
 AWARD_LEVELS = {
