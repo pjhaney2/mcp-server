@@ -381,25 +381,6 @@ def get_postsecondary_institutions(
 ) -> List[Dict[str, Any]]:
     """Get institution directory from Integrated Postsecondary Education Data System (IPEDS) data from National Center for Education Statistics (NCES)."""
     try:
-        # Debug logging
-        logger.info(f"IPEDS get_postsecondary_institutions called with:")
-        logger.info(f"  state_fips: {state_fips} (type: {type(state_fips)})")
-        logger.info(f"  county_fips: {county_fips} (type: {type(county_fips)})")
-        
-        # Handle potential string representations of lists
-        if isinstance(state_fips, str):
-            logger.warning(f"state_fips received as string: {state_fips}")
-            # If it looks like a JSON array, try to parse it
-            if state_fips.startswith('[') and state_fips.endswith(']'):
-                import json
-                state_fips = json.loads(state_fips)
-        
-        if county_fips and isinstance(county_fips, str):
-            logger.warning(f"county_fips received as string: {county_fips}")
-            if county_fips.startswith('[') and county_fips.endswith(']'):
-                import json
-                county_fips = json.loads(county_fips)
-        
         return ipeds_get_institutions(
             state_fips=state_fips,
             county_fips=county_fips,
