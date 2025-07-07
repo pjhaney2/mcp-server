@@ -497,6 +497,81 @@ TOOL_CONFIGS = {
                 }
             }
         ]
+    },
+    "eia_elec_rates": {
+        "name": "EIA Electricity Rates",
+        "description": "Get electricity rates by zipcode from investor-owned and non-investor-owned utilities",
+        "tools": [
+            {
+                "name": "get_electricity_rates",
+                "description": "Fetch electricity rates for specified zipcodes from IOU and non-IOU utilities",
+                "parameters": {
+                    "zipcodes": {"type": "array", "items": {"type": "string"}, "description": "List of zipcode strings to filter for (e.g., ['60067', '60622'] for multiple zipcodes)"}
+                }
+            }
+        ]
+    },
+    "ipeds_institution_directory": {
+        "name": "IPEDS Institution Directory",
+        "description": "Get postsecondary institution directory data from IPEDS with filtering by location, category, and keywords",
+        "tools": [
+            {
+                "name": "get_postsecondary_institutions",
+                "description": "Get institution directory from Integrated Postsecondary Education Data System (IPEDS) data",
+                "parameters": {
+                    "state_fips": {"type": "array", "items": {"type": "string"}, "description": "State FIPS code(s). Array of strings (e.g., ['17'] for Illinois or ['17', '06'] for Illinois and California)"},
+                    "county_fips": {"type": "array", "items": {"type": "string"}, "description": "County FIPS code(s) - can be 3-digit (e.g., ['031']) or full 5-digit codes (e.g., ['17031']). Array of strings (optional)"},
+                    "cbsa": {"type": "array", "items": {"type": "string"}, "description": "Core Based Statistical Area code(s). Array of strings (e.g., ['16980'] for Chicago metro) (optional)"},
+                    "year": {"type": "integer", "description": "Year of data (defaults to current year - 2)", "optional": True},
+                    "inst_category": {"type": "array", "items": {"type": "integer"}, "description": "Institution category code(s). Array of integers: 1=Graduate only, 2=Primarily bachelor's+, 3=Not primarily bachelor's+, 4=Associate's & certificates, 5=Nondegree above bachelor's, 6=Nondegree sub-bachelor's (optional)"},
+                    "inst_keywords": {"type": "array", "items": {"type": "string"}, "description": "Optional keyword(s) to filter institution names (case-insensitive). Array of strings (e.g., ['university'] or ['college', 'community']) (optional)"}
+                }
+            }
+        ]
+    },
+    "ipeds_program_data": {
+        "name": "IPEDS Program Completion Data",
+        "description": "Get program completion data from IPEDS with filtering by location, award levels, and CIP code keywords",
+        "tools": [
+            {
+                "name": "get_programs",
+                "description": "Get program completion data from Integrated Postsecondary Education Data System (IPEDS) data",
+                "parameters": {
+                    "state_fips": {"type": "array", "items": {"type": "string"}, "description": "State FIPS code(s). Array of strings (e.g., ['17'] for Illinois or ['17', '06'] for Illinois and California)"},
+                    "year": {"type": "integer", "description": "Year of data (defaults to current year - 3)", "optional": True},
+                    "award_levels": {"type": "array", "items": {"type": "integer"}, "description": "Award level code(s). Array of integers (defaults to [4, 7, 9, 22, 23, 24] for Associate's, Bachelor's, Master's, and Doctoral degrees). 4=Associate's, 7=Bachelor's, 9=Master's, 22=Doctor's research, 23=Doctor's professional, 24=Doctor's other (optional)"},
+                    "cip_keywords": {"type": "array", "items": {"type": "string"}, "description": "Optional keyword(s) to filter CIP code descriptions (case-insensitive). Array of strings (e.g., ['engineering'] or ['computer', 'technology']) (optional)"}
+                }
+            }
+        ]
+    },
+    "ipeds_cip_codes": {
+        "name": "IPEDS CIP Code Lookup",
+        "description": "Look up Classification of Instructional Programs (CIP) codes and descriptions",
+        "tools": [
+            {
+                "name": "get_cip_codes",
+                "description": "Get CIP code information from IPEDS data",
+                "parameters": {
+                    "search_term": {"type": "string", "description": "Optional search term to filter CIP code names (case-insensitive)", "optional": True},
+                    "cip_codes": {"type": "array", "items": {"type": "string"}, "description": "Optional CIP code(s) to look up specific codes. Array of strings (optional)"}
+                }
+            }
+        ]
+    },
+    "ipeds_award_levels": {
+        "name": "IPEDS Award Level Lookup",
+        "description": "Look up IPEDS award level codes and descriptions",
+        "tools": [
+            {
+                "name": "get_award_levels",
+                "description": "Get award level information from IPEDS data",
+                "parameters": {
+                    "search_term": {"type": "string", "description": "Optional search term to filter award level names (case-insensitive)", "optional": True},
+                    "award_level_codes": {"type": "array", "items": {"type": "string"}, "description": "Optional award level code(s) to look up specific levels. Array of strings (optional)"}
+                }
+            }
+        ]
     }
 }
 

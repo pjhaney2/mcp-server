@@ -8,6 +8,7 @@ This server provides calculator tools and PDF resources.
 import os
 import sys
 import logging
+import json
 from pathlib import Path
 from fastmcp import FastMCP
 import uvicorn
@@ -36,10 +37,10 @@ from tools.acs_data.acs_housing_state import acs_housing_state_pull
 from tools.acs_data.acs_social_national import acs_social_national_pull
 from tools.acs_data.acs_economic_national import acs_economic_national_pull
 from tools.acs_data.acs_housing_national import acs_housing_national_pull
-from tools.acs_data.fips_acs_county import search_county_fips
-from tools.acs_data.fips_acs_place import search_place_fips
-from tools.acs_data.fips_acs_msa import search_msa_fips
-from tools.acs_data.fips_acs_state import search_state_fips
+from tools.acs_data.fips_census_county import search_county_fips
+from tools.acs_data.fips_census_place import search_place_fips
+from tools.acs_data.fips_census_msa import search_msa_fips
+from tools.acs_data.fips_census_state import search_state_fips
 from tools.oews_data.oews_data import get_oews_data
 from tools.oews_data.oews_fips import search_oews_fips
 from tools.oews_data.oews_soc import search_oews_soc
@@ -53,6 +54,11 @@ from tools.acs_data.acs_demographics_place import acs_demographics_place_pull
 from tools.acs_data.acs_demographics_msa import acs_demographics_msa_pull
 from tools.acs_data.acs_demographics_state import acs_demographics_state_pull
 from tools.acs_data.acs_demographics_national import acs_demographics_national_pull
+from tools.eia_data.eia_elec_rates import get_electricity_rates
+from tools.ipeds_data.ipeds_institution_directory import get_postsecondary_institutions as ipeds_get_institutions
+from tools.ipeds_data.ipeds_program_data import get_programs as ipeds_get_programs
+from tools.ipeds_data.get_cip_codes import get_cip_codes as ipeds_get_cip_codes
+from tools.ipeds_data.get_award_levels import get_award_levels as ipeds_get_award_levels
 from prompts.case_study_creator import get_case_study_prompt
 
 # Set up logging
@@ -61,6 +67,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
+
 
 # Create the MCP server
 mcp = FastMCP(SERVER_CONFIG["name"])
@@ -353,6 +360,106 @@ def get_acs_national_demographics_data(year: Optional[str] = None) -> Dict[str, 
     except Exception as e:
         logger.error(f"Error in acs_demographics_national_pull: {e}")
         raise ValueError("Invalid input: Please provide valid optional year")
+
+@mcp.tool()
+def get_eia_electricity_rates(zipcodes: List[str]) -> List[Dict[str, Any]]:
+    """Fetch electricity rates for specified zipcodes from IOU and non-IOU utilities. Returns a list of dictionaries containing utility rate data with added 'utility_type' field."""
+    try:
+        return get_electricity_rates(zipcodes)
+    except Exception as e:
+        logger.error(f"Error in get_electricity_rates: {e}")
+        raise ValueError("Invalid input: Please provide valid zipcode(s)")
+
+@mcp.tool()
+def get_postsecondary_institutions(
+    state_fips: List[str],
+    county_fips: List[str] = None,
+    cbsa: List[str] = None,
+    year: Optional[int] = None,
+    inst_category: List[int] = None,
+    inst_keywords: List[str] = None
+) -> List[Dict[str, Any]]:
+    """Get institution directory from Integrated Postsecondary Education Data System (IPEDS) data from National Center for Education Statistics (NCES)."""
+    try:
+        # Debug logging
+        logger.info(f"IPEDS get_postsecondary_institutions called with:")
+        logger.info(f"  state_fips: {state_fips} (type: {type(state_fips)})")
+        logger.info(f"  county_fips: {county_fips} (type: {type(county_fips)})")
+        
+        # Handle potential string representations of lists
+        if isinstance(state_fips, str):
+            logger.warning(f"state_fips received as string: {state_fips}")
+            # If it looks like a JSON array, try to parse it
+            if state_fips.startswith('[') and state_fips.endswith(']'):
+                import json
+                state_fips = json.loads(state_fips)
+        
+        if county_fips and isinstance(county_fips, str):
+            logger.warning(f"county_fips received as string: {county_fips}")
+            if county_fips.startswith('[') and county_fips.endswith(']'):
+                import json
+                county_fips = json.loads(county_fips)
+        
+        return ipeds_get_institutions(
+            state_fips=state_fips,
+            county_fips=county_fips,
+            cbsa=cbsa,
+            year=year,
+            inst_category=inst_category,
+            inst_keywords=inst_keywords
+        )
+    except Exception as e:
+        logger.error(f"Error in get_postsecondary_institutions: {e}")
+        raise ValueError("Invalid input: Please provide valid parameters")
+
+@mcp.tool()
+def get_programs(
+    state_fips: List[str],
+    year: Optional[int] = None,
+    award_levels: List[int] = None,
+    cip_keywords: List[str] = None
+) -> List[Dict[str, Any]]:
+    """Get program completion data from Integrated Postsecondary Education Data System (IPEDS) data from National Center for Education Statistics (NCES)."""
+    try:
+        return ipeds_get_programs(
+            state_fips=state_fips,
+            year=year,
+            award_levels=award_levels,
+            cip_keywords=cip_keywords
+        )
+    except Exception as e:
+        logger.error(f"Error in get_programs: {e}")
+        raise ValueError("Invalid input: Please provide valid parameters")
+
+@mcp.tool()
+def get_cip_codes(
+    search_term: Optional[str] = None,
+    cip_codes: List[str] = None
+) -> List[Dict[str, Any]]:
+    """Get CIP code information from IPEDS data - look up Classification of Instructional Programs codes and descriptions."""
+    try:
+        return ipeds_get_cip_codes(
+            search_term=search_term,
+            cip_codes=cip_codes
+        )
+    except Exception as e:
+        logger.error(f"Error in get_cip_codes: {e}")
+        raise ValueError("Invalid input: Please provide valid parameters")
+
+@mcp.tool()
+def get_award_levels(
+    search_term: Optional[str] = None,
+    award_level_codes: List[str] = None
+) -> List[Dict[str, Any]]:
+    """Get award level information from IPEDS data - look up award level codes and descriptions."""
+    try:
+        return ipeds_get_award_levels(
+            search_term=search_term,
+            award_level_codes=award_level_codes
+        )
+    except Exception as e:
+        logger.error(f"Error in get_award_levels: {e}")
+        raise ValueError("Invalid input: Please provide valid parameters")
 
 
 @mcp.prompt(name="case_study_creator", description="Create a one-page case study from reports or documents")

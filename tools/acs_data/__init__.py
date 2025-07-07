@@ -33,10 +33,10 @@ Modules:
 - rank_acs_data_low: Rank geographic areas by lowest values for ACS data points
 """
 
-from .fips_acs_county import search_county_fips
-from .fips_acs_place import search_place_fips
-from .fips_acs_msa import search_msa_fips
-from .fips_acs_state import search_state_fips
+from .fips_census_county import search_county_fips
+from .fips_census_place import search_place_fips
+from .fips_census_msa import search_msa_fips
+from .fips_census_state import search_state_fips
 from .acs_social_county import acs_social_county_pull
 from .acs_economic_county import acs_economic_county_pull
 from .acs_housing_county import acs_housing_county_pull
