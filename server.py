@@ -372,11 +372,11 @@ def get_eia_electricity_rates(zipcodes: List[str]) -> List[Dict[str, Any]]:
 
 @mcp.tool()
 def get_postsecondary_institutions(
-    state_fips: List[str],
+    state_fips: List[str] = None,
     county_fips: List[str] = None,
     cbsa: List[str] = None,
-    year: Optional[int] = None,
-    inst_category: List[int] = None,
+    year: List[str] = None,
+    inst_category: List[str] = None,
     inst_keywords: List[str] = None
 ) -> List[Dict[str, Any]]:
     """Get institution directory from Integrated Postsecondary Education Data System (IPEDS) data from National Center for Education Statistics (NCES)."""
@@ -395,18 +395,20 @@ def get_postsecondary_institutions(
 
 @mcp.tool()
 def get_programs(
-    state_fips: List[str],
-    year: Optional[int] = None,
-    award_levels: List[int] = None,
-    cip_keywords: List[str] = None
-) -> List[Dict[str, Any]]:
+    state_fips: List[str] = None,
+    year: List[str] = None,
+    award_levels: List[str] = None,
+    cip_keywords: List[str] = None,
+    unitid: List[str] = None
+) -> Dict[str, Any]:
     """Get program completion data from Integrated Postsecondary Education Data System (IPEDS) data from National Center for Education Statistics (NCES)."""
     try:
         return ipeds_get_programs(
             state_fips=state_fips,
             year=year,
             award_levels=award_levels,
-            cip_keywords=cip_keywords
+            cip_keywords=cip_keywords,
+            unitid=unitid
         )
     except Exception as e:
         logger.error(f"Error in get_programs: {e}")
