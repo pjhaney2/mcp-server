@@ -59,6 +59,8 @@ from tools.ipeds_data.ipeds_institution_directory import get_postsecondary_insti
 from tools.ipeds_data.ipeds_program_data import get_programs as ipeds_get_programs
 from tools.ipeds_data.get_cip_codes import get_cip_codes as ipeds_get_cip_codes
 from tools.ipeds_data.get_award_levels import get_award_levels as ipeds_get_award_levels
+from tools.cre_data.cre_county import cre_county_pull
+from tools.cre_data.cre_state import cre_state_pull
 from prompts.case_study_creator import get_case_study_prompt
 
 # Set up logging
@@ -360,6 +362,24 @@ def get_acs_national_demographics_data(year: Optional[str] = None) -> Dict[str, 
     except Exception as e:
         logger.error(f"Error in acs_demographics_national_pull: {e}")
         raise ValueError("Invalid input: Please provide valid optional year")
+
+@mcp.tool()
+def get_cre_county_data(geo_fips: List[str], state_fips: str, year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls county-level Community Resilience Estimates (CRE) data from the US Census Bureau. CRE measures social vulnerability to disasters using 10 risk factors and provides estimates and percentages for populations with 0, 1-2, and 3+ risk factors."""
+    try:
+        return cre_county_pull(geo_fips, state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in cre_county_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid FIPS codes and optional year")
+
+@mcp.tool()
+def get_cre_state_data(state_fips: List[str], year: Optional[str] = None) -> Dict[str, Any]:
+    """Pulls state-level Community Resilience Estimates (CRE) data from the US Census Bureau. CRE measures social vulnerability to disasters using 10 risk factors and provides estimates and percentages for populations with 0, 1-2, and 3+ risk factors."""
+    try:
+        return cre_state_pull(state_fips, year)
+    except Exception as e:
+        logger.error(f"Error in cre_state_pull: {e}")
+        raise ValueError("Invalid input: Please provide valid state FIPS codes and optional year")
 
 @mcp.tool()
 def get_eia_electricity_rates(zipcodes: List[str]) -> List[Dict[str, Any]]:

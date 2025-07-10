@@ -572,6 +572,35 @@ TOOL_CONFIGS = {
                 }
             }
         ]
+    },
+    "cre_county": {
+        "name": "CRE County Data",
+        "description": "Community Resilience Estimates (CRE) county-level data from the US Census Bureau measuring social vulnerability to disasters",
+        "tools": [
+            {
+                "name": "get_cre_county_data",
+                "description": "Pulls county-level Community Resilience Estimates (CRE) data measuring social vulnerability to disasters using 10 risk factors",
+                "parameters": {
+                    "geo_fips": {"type": "array", "items": {"type": "string"}, "description": "County FIPS code(s). Array of strings (e.g., ['031'] for single county or ['031', '045'] for multiple counties)"},
+                    "state_fips": {"type": "string", "description": "State FIPS code as a string (e.g., '17' for Illinois)"},
+                    "year": {"type": "string", "description": "Year of CRE data. Available years: 2019, 2021, 2022, 2023 (defaults to 2023)", "optional": True}
+                }
+            }
+        ]
+    },
+    "cre_state": {
+        "name": "CRE State Data", 
+        "description": "Community Resilience Estimates (CRE) state-level data from the US Census Bureau measuring social vulnerability to disasters",
+        "tools": [
+            {
+                "name": "get_cre_state_data",
+                "description": "Pulls state-level Community Resilience Estimates (CRE) data measuring social vulnerability to disasters using 10 risk factors",
+                "parameters": {
+                    "state_fips": {"type": "array", "items": {"type": "string"}, "description": "State FIPS code(s). Array of strings (e.g., ['17'] for single state or ['17', '26'] for multiple states)"},
+                    "year": {"type": "string", "description": "Year of CRE data. Available years: 2019, 2021, 2022, 2023 (defaults to 2023)", "optional": True}
+                }
+            }
+        ]
     }
 }
 
